@@ -1,37 +1,54 @@
-<<<<<<< HEAD
-<html>
-<body>
-    <h1>DisasterEye Home</h1>
-    <ul>
-        <li><a href="/earthquakes">Earthquakes</a></li>
-        <li><a href="/wildfires">Wildfires</a></li>
-        <li><a href="/storms">Storms</a></li>
-        <li><a href="/floods">Floods</a></li>
-        <li><a href="/extreme-heat">Extreme Heat</a></li>
-        <li><a href="/kit">Survival Kit</a></li>
-        <li><a href="/chat">Chat</a></li>
-    </ul>
-=======
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Disaster Eye</title>
+    <meta charset="UTF-8">
+    <title>DisasterEye</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
-<body>
-<br><br>
+<body class="container mt-5">
+    <h1 class="text-center mb-4">DisasterEye Dashboard</h1>
 
-<a href="/wildfires">Wildfires</a>
+    <div class="mb-4">
+        <h4>Location Map</h4>
+        <input type="text" id="locationInput" placeholder="Enter City" class="form-control mb-2">
+        <button onclick="searchLocation()" class="btn btn-primary mb-2">Set Location</button>
+        <div id="map" style="height: 300px; width: 100%; border: 1px solid #ccc;"></div>
+    </div>
 
-<h1>Disaster Eye</h1>
+    <div class="row text-center">
+        <div class="col-md-4 mb-3"><a href="/earthquakes" class="btn btn-primary w-100 py-3">Earthquakes</a></div>
+        <div class="col-md-4 mb-3"><a href="/wildfires" class="btn btn-danger w-100 py-3">Wildfires</a></div>
+        <div class="col-md-4 mb-3"><a href="/storms" class="btn btn-secondary w-100 py-3">Storms</a></div>
+        <div class="col-md-4 mb-3"><a href="/floods" class="btn btn-info w-100 py-3">Floods</a></div>
+        <div class="col-md-4 mb-3"><a href="/extreme-heat" class="btn btn-warning w-100 py-3">Extreme Heat</a></div>
+        <div class="col-md-4 mb-3"><a href="/kit" class="btn btn-success w-100 py-3">Survival Kit</a></div>
+        <div class="col-md-12"><a href="/chat" class="btn btn-dark w-100 py-3">Chat</a></div>
+    </div>
 
-<p>See. Predict. Protect.</p>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        var marker;
 
-<p>
-Welcome to Disaster Eye.
-</p>
-
-<a href="/earthquakes">Earthquakes</a>
-
->>>>>>> 152eed4c0916b339f556c52e9db9a3cbc63879e1
+        function searchLocation() {
+            var query = document.getElementById('locationInput').value;
+            if(!query) return;
+            fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query))
+            .then(res => res.json())
+            .then(data => {
+                if(data.length > 0) {
+                    var lat = data[0].lat;
+                    var lon = data[0].lon;
+                    map.setView([lat, lon], 12);
+                    if(marker) map.removeLayer(marker);
+                    marker = L.marker([lat, lon]).addTo(map).bindPopup(data[0].display_name).openPopup();
+                    localStorage.setItem('savedLat', lat);
+                    localStorage.setItem('savedLng', lon);
+                }
+            });
+        }
+    </script>
 </body>
 </html>

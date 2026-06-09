@@ -1,7 +1,37 @@
-<html>
-<body>
-    <a href="/">Back</a>
-    <h2>Storms</h2>
-    <p>Storm camera goes here.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Storms</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+    <a href="/" class="btn btn-outline-dark mb-4">Back to Dashboard</a>
+    <h2>Storm Camera</h2>
+
+    <video id="webcam" autoplay playsinline style="width: 100%; max-width: 500px; border: 1px solid #ccc;"></video>
+    <br>
+    <button onclick="scanSky()" class="btn btn-secondary mt-3">Scan Sky</button>
+
+    <div id="result" class="mt-4 d-none">
+        <h4 id="status"></h4>
+        <p>Density: <span id="density"></span>%</p>
+    </div>
+
+    <script>
+        const video = document.getElementById('webcam');
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+            video.srcObject = stream;
+        });
+
+        function scanSky() {
+            fetch('/analyze-sky', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').classList.remove('d-none');
+                document.getElementById('status').innerText = data.status;
+                document.getElementById('density').innerText = data.density;
+            });
+        }
+    </script>
 </body>
 </html>

@@ -1,59 +1,55 @@
-<<<<<<< HEAD
-<html>
-<body>
-    <a href="/">Back</a>
-    <h2>Wildfires</h2>
-    <p>Wildfire data goes here.</p>
-=======
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Wildfires</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
-<body>
+<body class="container mt-5">
+    <a href="/" class="btn btn-outline-dark mb-4">Back to Dashboard</a>
+    <h2>Wildfires Tracker</h2>
 
-<h1>Wildfires</h1>
+    <div id="firemap" style="height: 300px; width: 100%; border: 1px solid #ccc; margin-bottom: 20px;"></div>
 
-<form>
+    <form method="POST">
+        <input type="hidden" name="lat" id="lat">
+        <input type="hidden" name="lng" id="lng">
+        <button type="submit" class="btn btn-danger">Report Fire</button>
+    </form>
 
-    Location:
-    <input type="text">
-    <br><br>
+    {% if lat and lng %}
+    <div class="mt-4 alert alert-danger">
+        <h4>Fire Reported at {{ lat }}, {{ lng }}</h4>
+    </div>
+    {% endif %}
 
-    Wind Direction:
-    <input type="text">
-    <br><br>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var savedLat = localStorage.getItem('savedLat') || 20;
+        var savedLng = localStorage.getItem('savedLng') || 0;
 
-    Wind Speed:
-    <input type="text">
-    <br><br>
+        var map = L.map('firemap').setView([savedLat, savedLng], savedLat == 20 ? 2 : 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    Description:
-    <input type="text">
-    <br><br>
+        var fireMarker;
+        map.on('click', function(e) {
+            document.getElementById('lat').value = e.latlng.lat;
+            document.getElementById('lng').value = e.latlng.lng;
+            if(fireMarker) map.removeLayer(fireMarker);
+            fireMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+        });
 
-    <button type="submit">Submit</button>
-
-</form>
-
-<hr>
-
-<h2>Fire Reports</h2>
-
-<p>California - Fire detected near forest.</p>
-
-<p>Arizona - Smoke reported by residents.</p>
-
-<p>Nevada - Small wildfire spreading east.</p>
-
-<hr>
-
-<h2>Prediction</h2>
-
-<p>Estimated spread direction: East</p>
-
-<a href="/">Back</a>
-
->>>>>>> 152eed4c0916b339f556c52e9db9a3cbc63879e1
+        {% if lat and lng %}
+        var reportedLat = {{ lat }};
+        var reportedLng = {{ lng }};
+        L.marker([reportedLat, reportedLng]).addTo(map).bindPopup("Fire").openPopup();
+        L.polygon([
+            [reportedLat, reportedLng],
+            [reportedLat + 0.05, reportedLng + 0.05],
+            [reportedLat + 0.05, reportedLng - 0.05]
+        ], {color: 'red'}).addTo(map);
+        map.setView([reportedLat, reportedLng], 12);
+        {% endif %}
+    </script>
 </body>
 </html>
