@@ -6,6 +6,8 @@ import random
 app = Flask(__name__)
 
 chat_messages = []
+sos_events = []
+volunteers = []
 
 @app.route('/')
 def home():
@@ -45,7 +47,10 @@ def floods():
 
 @app.route('/extreme-heat')
 def extreme_heat():
-    return render_template('extreme_heat.html')
+    temp = random.randint(35, 45)
+    hum = random.randint(50, 90)
+    danger = "CRITICAL" if (temp > 38 and hum > 60) else "MODERATE"
+    return render_template('extreme_heat.html', temp=temp, hum=hum, danger=danger)
 
 @app.route('/kit')
 def kit():
@@ -69,6 +74,33 @@ def api_chat():
             chat_messages.pop(0)
         return jsonify({"status": "success"})
     return jsonify(chat_messages)
+
+@app.route('/api/sos', methods=['GET', 'POST'])
+def api_sos():
+    if request.method == 'POST':
+        data = request.json
+        new_event = {
+            "type": data.get("type", "Emergency"),
+            "desc": data.get("desc", ""),
+            "lat": data.get("lat"),
+            "lng": data.get("lng")
+        }
+        sos_events.append(new_event)
+        return jsonify({"status": "success"})
+    return jsonify(sos_events)
+
+@app.route('/api/volunteers', methods=['GET', 'POST'])
+def api_volunteers():
+    if request.method == 'POST':
+        data = request.json
+        new_vol = {
+            "name": data.get("name", "Volunteer"),
+            "lat": data.get("lat"),
+            "lng": data.get("lng")
+        }
+        volunteers.append(new_vol)
+        return jsonify({"status": "success"})
+    return jsonify(volunteers)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

@@ -9,11 +9,19 @@
 <body class="container mt-5">
     <h1 class="text-center mb-4">DisasterEye Dashboard</h1>
 
-    <div class="mb-4">
-        <h4>Location Map</h4>
-        <input type="text" id="locationInput" placeholder="Enter City" class="form-control mb-2">
-        <button onclick="searchLocation()" class="btn btn-primary mb-2">Set Location</button>
-        <div id="map" style="height: 300px; width: 100%; border: 1px solid #ccc;"></div>
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h4>Location Map</h4>
+            <input type="text" id="locationInput" placeholder="Enter City" class="form-control mb-2">
+            <button onclick="searchLocation()" class="btn btn-primary mb-2">Set Location</button>
+            <div id="map" style="height: 400px; width: 100%; border: 1px solid #ccc;"></div>
+        </div>
+        <div class="col-md-4">
+            <h4>Actions</h4>
+            <button onclick="sendSOS()" class="btn btn-danger w-100 mb-2 py-3">Send S.O.S</button>
+            <button onclick="registerVolunteer()" class="btn btn-success w-100 mb-2 py-3">Register as Volunteer</button>
+            <button onclick="generateEvac()" class="btn btn-info w-100 mb-2 py-3">Generate Evacuation Route</button>
+        </div>
     </div>
 
     <div class="row text-center">
@@ -31,6 +39,9 @@
         var map = L.map('map').setView([20, 0], 2);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         var marker;
+        var sosLayer = L.layerGroup().addTo(map);
+        var volLayer = L.layerGroup().addTo(map);
+        var routeLayer = L.layerGroup().addTo(map);
 
         function searchLocation() {
             var query = document.getElementById('locationInput').value;
@@ -49,6 +60,66 @@
                 }
             });
         }
+
+        function sendSOS() {
+            var lat = localStorage.getItem('savedLat');
+            var lng = localStorage.getItem('savedLng');
+            if(!lat || !lng) return;
+            fetch('/api/sos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lat: lat, lng: lng })
+            }).then(() => loadMapData());
+        }
+
+        function registerVolunteer() {
+            var lat = localStorage.getItem('savedLat');
+            var lng = localStorage.getItem('savedLng');
+            if(!lat || !lng) return;
+            fetch('/api/volunteers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lat: lat, lng: lng })
+            }).then(() => loadMapData());
+        }
+
+        function generateEvac() {
+            var lat = parseFloat(localStorage.getItem('savedLat'));
+            var lng = parseFloat(localStorage.getItem('savedLng'));
+            if(!lat || !lng) return;
+            routeLayer.clearLayers();
+            var targetLat = lat + 0.05;
+            var targetLng = lng + 0.05;
+            L.polyline([[lat, lng], [targetLat, targetLng]], {color: 'blue'}).addTo(routeLayer);
+            L.marker([targetLat, targetLng]).addTo(routeLayer).bindPopup("Safe Zone").openPopup();
+        }
+
+        function loadMapData() {
+            fetch('/api/sos').then(res => res.json()).then(data => {
+                sosLayer.clearLayers();
+                data.forEach(ev => {
+                    L.circleMarker([ev.lat, ev.lng], {color: 'red'}).addTo(sosLayer).bindPopup("SOS");
+                });
+            });
+            fetch('/api/volunteers').then(res => res.json()).then(data => {
+                volLayer.clearLayers();
+                data.forEach(vol => {
+                    L.circleMarker([vol.lat, vol.lng], {color: 'green'}).addTo(volLayer).bindPopup("Volunteer");
+                });
+            });
+        }
+
+        setInterval(loadMapData, 5000);
+
+        window.onload = function() {
+            var savedLat = localStorage.getItem('savedLat');
+            var savedLng = localStorage.getItem('savedLng');
+            if(savedLat && savedLng) {
+                map.setView([savedLat, savedLng], 12);
+                marker = L.marker([savedLat, savedLng]).addTo(map);
+            }
+            loadMapData();
+        };
     </script>
 </body>
 </html>
