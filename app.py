@@ -9,9 +9,18 @@ chat_messages = []
 sos_events = []
 volunteers = []
 
+def get_latest_alert():
+    alerts = [
+        "LATEST EVENT: Magnitude 6.2 Earthquake detected.",
+        "LATEST EVENT: High Wildfire Risk reported.",
+        "LATEST EVENT: Severe atmospheric anomalies detected.",
+        "LATEST EVENT: WBGT index reaching critical levels."
+    ]
+    return random.choice(alerts)
+
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html', ticker=get_latest_alert())
 
 @app.route('/earthquakes')
 def earthquakes():
@@ -21,7 +30,7 @@ def earthquakes():
         latest_quakes = response['features'][:5]
     except:
         latest_quakes = []
-    return render_template('earthquakes.html', quakes=latest_quakes)
+    return render_template('earthquakes.html', quakes=latest_quakes, ticker=get_latest_alert())
 
 @app.route('/wildfires', methods=['GET', 'POST'])
 def wildfires():
@@ -29,11 +38,11 @@ def wildfires():
     if request.method == 'POST':
         lat = request.form.get('lat')
         lng = request.form.get('lng')
-    return render_template('wildfires.html', lat=lat, lng=lng)
+    return render_template('wildfires.html', lat=lat, lng=lng, ticker=get_latest_alert())
 
 @app.route('/storms')
 def storms():
-    return render_template('storms.html')
+    return render_template('storms.html', ticker=get_latest_alert())
 
 @app.route('/analyze-sky', methods=['POST'])
 def analyze_sky():
@@ -43,22 +52,22 @@ def analyze_sky():
 
 @app.route('/floods')
 def floods():
-    return render_template('floods.html')
+    return render_template('floods.html', ticker=get_latest_alert())
 
 @app.route('/extreme-heat')
 def extreme_heat():
     temp = random.randint(35, 45)
     hum = random.randint(50, 90)
     danger = "CRITICAL" if (temp > 38 and hum > 60) else "MODERATE"
-    return render_template('extreme_heat.html', temp=temp, hum=hum, danger=danger)
+    return render_template('extreme_heat.html', temp=temp, hum=hum, danger=danger, ticker=get_latest_alert())
 
 @app.route('/kit')
 def kit():
-    return render_template('kit.html')
+    return render_template('kit.html', ticker=get_latest_alert())
 
 @app.route('/chat')
 def chat():
-    return render_template('chat.html')
+    return render_template('chat.html', ticker=get_latest_alert())
 
 @app.route('/api/chat', methods=['GET', 'POST'])
 def api_chat():
@@ -95,6 +104,7 @@ def api_volunteers():
         data = request.json
         new_vol = {
             "name": data.get("name", "Volunteer"),
+            "skills": data.get("skills", "General Support"),
             "lat": data.get("lat"),
             "lng": data.get("lng")
         }

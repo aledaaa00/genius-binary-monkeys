@@ -1,7 +1,56 @@
-<html>
-<body>
-    <a href="/">Back</a>
-    <h2>Survival Kit</h2>
-    <p>Kit calculator goes here.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Survival Kit</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-white container mt-5">
+    <div class="alert alert-danger text-center"><strong>{{ ticker }}</strong></div>
+    <a href="/" class="btn btn-outline-light mb-4">Back to Dashboard</a>
+    <h2>Survival Kit Calculator</h2>
+
+    <div class="mb-3">
+        <label>Family Size:</label>
+        <input type="number" id="familySize" class="form-control bg-secondary text-white" value="1">
+    </div>
+    <div class="mb-3">
+        <label>Water (Liters):</label>
+        <input type="number" id="water" class="form-control bg-secondary text-white" value="0">
+    </div>
+    <div class="mb-3">
+        <label>Food (Days):</label>
+        <input type="number" id="food" class="form-control bg-secondary text-white" value="0">
+    </div>
+    <button onclick="calculate()" class="btn btn-success">Calculate</button>
+
+    <div id="results" class="mt-4 d-none alert alert-warning text-dark">
+        <h4 id="status"></h4>
+        <ul id="advice"></ul>
+    </div>
+
+    <script>
+        function calculate() {
+            let members = document.getElementById('familySize').value;
+            let water = document.getElementById('water').value;
+            let food = document.getElementById('food').value;
+
+            let reqWater = members * 9;
+            let reqFood = members * 3;
+
+            document.getElementById('results').classList.remove('d-none');
+            let advice = document.getElementById('advice');
+            advice.innerHTML = "";
+            let ready = true;
+
+            if(water < reqWater) { ready = false; advice.innerHTML += `<li>Need ${reqWater - water} more liters of water.</li>`; }
+            if(food < reqFood) { ready = false; advice.innerHTML += `<li>Need food for ${reqFood - food} more days.</li>`; }
+
+            if(ready) {
+                document.getElementById('status').innerText = "Ready for 72 hours.";
+            } else {
+                document.getElementById('status').innerText = "Not ready.";
+            }
+        }
+    </script>
 </body>
 </html>

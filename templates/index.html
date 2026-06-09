@@ -6,34 +6,77 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
-<body class="container mt-5">
+<body class="bg-dark text-white container mt-5">
+    <div class="alert alert-danger text-center">
+        <strong>{{ ticker }}</strong>
+    </div>
+
     <h1 class="text-center mb-4">DisasterEye Dashboard</h1>
 
     <div class="row mb-4">
         <div class="col-md-8">
             <h4>Location Map</h4>
-            <input type="text" id="locationInput" placeholder="Enter City" class="form-control mb-2">
-            <button onclick="searchLocation()" class="btn btn-primary mb-2">Set Location</button>
-            <div id="map" style="height: 400px; width: 100%; border: 1px solid #ccc;"></div>
+            <div class="input-group mb-2">
+                <input type="text" id="locationInput" placeholder="Enter City" class="form-control bg-secondary text-white">
+                <button onclick="searchLocation()" class="btn btn-primary">Set Location</button>
+            </div>
+            <div id="map" style="height: 400px; width: 100%; border: 1px solid #555;"></div>
         </div>
         <div class="col-md-4">
             <h4>Actions</h4>
-            <button onclick="sendSOS()" class="btn btn-danger w-100 mb-2 py-3">Send S.O.S</button>
-            <button onclick="registerVolunteer()" class="btn btn-success w-100 mb-2 py-3">Register as Volunteer</button>
+            <button class="btn btn-danger w-100 mb-2 py-3" data-bs-toggle="modal" data-bs-target="#sosModal">Send S.O.S</button>
+            <button class="btn btn-success w-100 mb-2 py-3" data-bs-toggle="modal" data-bs-target="#volModal">Register as Volunteer</button>
             <button onclick="generateEvac()" class="btn btn-info w-100 mb-2 py-3">Generate Evacuation Route</button>
         </div>
     </div>
 
     <div class="row text-center">
-        <div class="col-md-4 mb-3"><a href="/earthquakes" class="btn btn-primary w-100 py-3">Earthquakes</a></div>
-        <div class="col-md-4 mb-3"><a href="/wildfires" class="btn btn-danger w-100 py-3">Wildfires</a></div>
-        <div class="col-md-4 mb-3"><a href="/storms" class="btn btn-secondary w-100 py-3">Storms</a></div>
-        <div class="col-md-4 mb-3"><a href="/floods" class="btn btn-info w-100 py-3">Floods</a></div>
-        <div class="col-md-4 mb-3"><a href="/extreme-heat" class="btn btn-warning w-100 py-3">Extreme Heat</a></div>
-        <div class="col-md-4 mb-3"><a href="/kit" class="btn btn-success w-100 py-3">Survival Kit</a></div>
-        <div class="col-md-12"><a href="/chat" class="btn btn-dark w-100 py-3">Chat</a></div>
+        <div class="col-md-4 mb-3"><a href="/earthquakes" class="btn btn-outline-primary w-100 py-3">Earthquakes</a></div>
+        <div class="col-md-4 mb-3"><a href="/wildfires" class="btn btn-outline-danger w-100 py-3">Wildfires</a></div>
+        <div class="col-md-4 mb-3"><a href="/storms" class="btn btn-outline-secondary w-100 py-3">Storms</a></div>
+        <div class="col-md-4 mb-3"><a href="/floods" class="btn btn-outline-info w-100 py-3">Floods</a></div>
+        <div class="col-md-4 mb-3"><a href="/extreme-heat" class="btn btn-outline-warning w-100 py-3">Extreme Heat</a></div>
+        <div class="col-md-4 mb-3"><a href="/kit" class="btn btn-outline-success w-100 py-3">Survival Kit</a></div>
+        <div class="col-md-12"><a href="/chat" class="btn btn-outline-light w-100 py-3">Chat</a></div>
     </div>
 
+    <div class="modal fade" id="sosModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">S.O.S Alert</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="sosType" class="form-control mb-2 bg-secondary text-white" placeholder="Emergency Type">
+                    <input type="text" id="sosDesc" class="form-control bg-secondary text-white" placeholder="Description">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="sendSOS()">Submit S.O.S</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="volModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Volunteer Registration</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="volName" class="form-control mb-2 bg-secondary text-white" placeholder="Your Name">
+                    <input type="text" id="volSkills" class="form-control bg-secondary text-white" placeholder="Your Skills/Assets">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="registerVolunteer()">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         var map = L.map('map').setView([20, 0], 2);
@@ -65,22 +108,34 @@
             var lat = localStorage.getItem('savedLat');
             var lng = localStorage.getItem('savedLng');
             if(!lat || !lng) return;
+            var type = document.getElementById('sosType').value;
+            var desc = document.getElementById('sosDesc').value;
             fetch('/api/sos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lat: lat, lng: lng })
-            }).then(() => loadMapData());
+                body: JSON.stringify({ lat: lat, lng: lng, type: type, desc: desc })
+            }).then(() => {
+                var modal = bootstrap.Modal.getInstance(document.getElementById('sosModal'));
+                modal.hide();
+                loadMapData();
+            });
         }
 
         function registerVolunteer() {
             var lat = localStorage.getItem('savedLat');
             var lng = localStorage.getItem('savedLng');
             if(!lat || !lng) return;
+            var name = document.getElementById('volName').value;
+            var skills = document.getElementById('volSkills').value;
             fetch('/api/volunteers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lat: lat, lng: lng })
-            }).then(() => loadMapData());
+                body: JSON.stringify({ lat: lat, lng: lng, name: name, skills: skills })
+            }).then(() => {
+                var modal = bootstrap.Modal.getInstance(document.getElementById('volModal'));
+                modal.hide();
+                loadMapData();
+            });
         }
 
         function generateEvac() {
@@ -98,13 +153,13 @@
             fetch('/api/sos').then(res => res.json()).then(data => {
                 sosLayer.clearLayers();
                 data.forEach(ev => {
-                    L.circleMarker([ev.lat, ev.lng], {color: 'red'}).addTo(sosLayer).bindPopup("SOS");
+                    L.circleMarker([ev.lat, ev.lng], {color: 'red'}).addTo(sosLayer).bindPopup(ev.type + ": " + ev.desc);
                 });
             });
             fetch('/api/volunteers').then(res => res.json()).then(data => {
                 volLayer.clearLayers();
                 data.forEach(vol => {
-                    L.circleMarker([vol.lat, vol.lng], {color: 'green'}).addTo(volLayer).bindPopup("Volunteer");
+                    L.circleMarker([vol.lat, vol.lng], {color: 'green'}).addTo(volLayer).bindPopup(vol.name + " - " + vol.skills);
                 });
             });
         }

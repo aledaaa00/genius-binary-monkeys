@@ -1,7 +1,46 @@
-<html>
-<body>
-    <a href="/">Back</a>
-    <h2>Chat</h2>
-    <p>Chat messages go here.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-white container mt-5">
+    <div class="alert alert-danger text-center"><strong>{{ ticker }}</strong></div>
+    <a href="/" class="btn btn-outline-light mb-4">Back to Dashboard</a>
+    <h2>Global Chat</h2>
+
+    <div id="chatBox" style="height: 300px; overflow-y: scroll; border: 1px solid #555; padding: 10px; margin-bottom: 20px; background-color: #222;"></div>
+
+    <input type="text" id="username" placeholder="Name" class="form-control mb-2 bg-secondary text-white">
+    <input type="text" id="message" placeholder="Message" class="form-control mb-2 bg-secondary text-white">
+    <button onclick="sendMessage()" class="btn btn-primary">Send</button>
+
+    <script>
+        function loadMessages() {
+            fetch('/api/chat').then(res => res.json()).then(data => {
+                const box = document.getElementById('chatBox');
+                box.innerHTML = "";
+                data.forEach(msg => {
+                    box.innerHTML += `<p><strong>${msg.user}</strong> (${msg.time}): ${msg.text}</p>`;
+                });
+                box.scrollTop = box.scrollHeight;
+            });
+        }
+        function sendMessage() {
+            const user = document.getElementById('username').value || "Anonymous";
+            const text = document.getElementById('message').value;
+            if(!text) return;
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: user, text: text })
+            }).then(() => {
+                document.getElementById('message').value = "";
+                loadMessages();
+            });
+        }
+        setInterval(loadMessages, 3000);
+        loadMessages();
+    </script>
 </body>
 </html>
