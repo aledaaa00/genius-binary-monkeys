@@ -10,5 +10,10 @@ def home():
 def earthquakes():
     return render_template("earthquakes.html")
 
+
+@app.route("/wildfires")
+def wildfires():
+    return render_template("wildfires.html")
+
 if __name__ == "__main__":
     app.run(debug=True)
