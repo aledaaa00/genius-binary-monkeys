@@ -69,6 +69,57 @@ def kit():
 def chat():
     return render_template('chat.html', ticker=get_latest_alert())
 
+
+@app.route('/triage')
+def triage():
+    return render_template('triage.html', ticker=get_latest_alert())
+
+
+@app.route('/api/triage', methods=['POST'])
+def api_triage():
+    data = request.json
+    injury = data.get("injury", "").lower()
+
+    if "burn" in injury or "arsur" in injury or "foc" in injury:
+        advice = [
+            "1. STOP the burning process immediately.",
+            "2. COOL the burn with cool (not cold) running water for at least 10 minutes.",
+            "3. REMOVE jewelry or tight items near the burn before it swells.",
+            "4. COVER the burn loosely with a sterile, non-adhesive bandage.",
+            "⚠️ DO NOT apply ice, butter, or ointments to severe burns."
+        ]
+        severity = "HIGH RISK"
+    elif "cut" in injury or "bleeding" in injury or "taietur" in injury or "sange" in injury:
+        advice = [
+            "1. APPLY DIRECT PRESSURE to the wound using a clean cloth or sterile dressing.",
+            "2. ELEVATE the injured area above the heart if possible.",
+            "3. KEEP PRESSURE for at least 10-15 minutes without peeking.",
+            "4. IF BLEEDING SEEPS THROUGH, add more layers. Do not remove the first layer.",
+            "⚠️ IF BLEEDING SPURTS, consider a tourniquet 2-3 inches above the wound."
+        ]
+        severity = "CRITICAL RISK"
+    elif "fractur" in injury or "bone" in injury or "rupt" in injury or "os" in injury:
+        advice = [
+            "1. IMMOBILIZE the injured area. Do not attempt to realign the bone.",
+            "2. APPLY A SPLINT using rigid items (rolled magazines, wood).",
+            "3. APPLY ICE packs wrapped in a cloth to reduce swelling.",
+            "4. ELEVATE if possible without causing more pain.",
+            "⚠️ DO NOT move the person if a spinal or neck injury is suspected."
+        ]
+        severity = "HIGH RISK"
+    else:
+        advice = [
+            "1. ENSURE the scene is safe for you and the patient.",
+            "2. ASSESS consciousness and breathing (ABC - Airway, Breathing, Circulation).",
+            "3. CALL FOR HELP using the S.O.S function if life-threatening.",
+            "4. KEEP the patient calm, warm, and comfortable.",
+            "⚠️ DO NOT give food or water if the patient needs surgery or is unconscious."
+        ]
+        severity = "ASSESSING..."
+
+    return jsonify({"advice": advice, "severity": severity})
+
+
 @app.route('/api/chat', methods=['GET', 'POST'])
 def api_chat():
     if request.method == 'POST':
