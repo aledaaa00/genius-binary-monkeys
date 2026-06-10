@@ -9,6 +9,7 @@ chat_messages = []
 sos_events = []
 volunteers = []
 
+
 def get_latest_alert():
     alerts = [
         "🚨 LATEST EVENT: Magnitude 6.2 Earthquake detected in the Pacific Ring of Fire.",
@@ -18,9 +19,11 @@ def get_latest_alert():
     ]
     return random.choice(alerts)
 
+
 @app.route('/')
 def home():
     return render_template('index.html', ticker=get_latest_alert())
+
 
 @app.route('/earthquakes')
 def earthquakes():
@@ -32,6 +35,7 @@ def earthquakes():
         latest_quakes = []
     return render_template('earthquakes.html', quakes=latest_quakes, ticker=get_latest_alert())
 
+
 @app.route('/wildfires', methods=['GET', 'POST'])
 def wildfires():
     lat, lng = None, None
@@ -40,9 +44,11 @@ def wildfires():
         lng = request.form.get('lng')
     return render_template('wildfires.html', lat=lat, lng=lng, ticker=get_latest_alert())
 
+
 @app.route('/storms')
 def storms():
     return render_template('storms.html', ticker=get_latest_alert())
+
 
 @app.route('/analyze-sky', methods=['POST'])
 def analyze_sky():
@@ -50,9 +56,11 @@ def analyze_sky():
     status = "DANGER" if density > 80 else "CLEAR"
     return jsonify({"status": status, "density": density})
 
+
 @app.route('/floods')
 def floods():
     return render_template('floods.html', ticker=get_latest_alert())
+
 
 @app.route('/extreme-heat')
 def extreme_heat():
@@ -61,9 +69,11 @@ def extreme_heat():
     danger = "CRITICAL - Lethal Wet-Bulb Temp" if (temp > 38 and hum > 60) else "MODERATE - Stay Hydrated"
     return render_template('extreme_heat.html', temp=temp, hum=hum, danger=danger, ticker=get_latest_alert())
 
+
 @app.route('/kit')
 def kit():
     return render_template('kit.html', ticker=get_latest_alert())
+
 
 @app.route('/chat')
 def chat():
@@ -135,6 +145,7 @@ def api_chat():
         return jsonify({"status": "success"})
     return jsonify(chat_messages)
 
+
 @app.route('/api/sos', methods=['GET', 'POST'])
 def api_sos():
     if request.method == 'POST':
@@ -150,6 +161,7 @@ def api_sos():
         return jsonify({"status": "success"})
     return jsonify(sos_events)
 
+
 @app.route('/api/volunteers', methods=['GET', 'POST'])
 def api_volunteers():
     if request.method == 'POST':
@@ -163,6 +175,7 @@ def api_volunteers():
         volunteers.append(new_vol)
         return jsonify({"status": "success"})
     return jsonify(volunteers)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

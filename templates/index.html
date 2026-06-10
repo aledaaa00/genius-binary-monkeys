@@ -6,50 +6,341 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root { --bg-color: #020617; --card-bg: #0f172a; --text-main: #f8fafc; --text-sec: #94a3b8; --accent: #0ea5e9; --danger: #ef4444; --border-color: #1e293b; --success: #22c55e; }
-        body { background: var(--bg-color); color: var(--text-main); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; padding-top: 80px; display: flex; flex-direction: column; }
+        :root {
+            --bg-color: #020617;
+            --card-bg: #0f172a;
+            --text-main: #f8fafc;
+            --text-sec: #94a3b8;
+            --accent: #0ea5e9;
+            --danger: #ef4444;
+            --border-color: #1e293b;
+            --success: #22c55e;
+            --warning: #f59e0b;
+        }
 
-        .ticker-bar { position: fixed; top: 0; left: 0; width: 100%; background: #ef4444; color: white; padding: 12px 0; z-index: 1050; overflow: hidden; white-space: nowrap; box-shadow: 0 2px 10px rgba(239, 68, 68, 0.5); border-bottom: 2px solid #b91c1c; }
-        .ticker-text { display: inline-block; padding-left: 100%; animation: ticker 25s linear infinite; font-weight: bold; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px; }
-        @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        body {
+            background: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-top: 80px;
+            display: flex;
+            flex-direction: column;
+        }
 
-        .cyber-eye-container { display: flex; justify-content: center; margin-bottom: 20px; }
-        .cyber-eye { position: relative; width: 120px; height: 60px; background: #020617; border-radius: 50% / 100% 100% 0 0; border: 3px solid var(--accent); border-bottom: 0; box-shadow: 0 0 30px rgba(14, 165, 233, 0.4), inset 0 0 20px rgba(14, 165, 233, 0.2); overflow: hidden; }
-        .cyber-eye::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--accent); box-shadow: 0 0 15px var(--accent); }
-        .pupil { position: absolute; bottom: 5px; left: 50%; width: 30px; height: 30px; background: #38bdf8; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 0 20px #7dd3fc, inset 0 0 10px #0369a1; animation: scan 4s ease-in-out infinite; }
-        .scanner-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #bae6fd; box-shadow: 0 0 10px #e0f2fe; animation: sweep 2s linear infinite alternate; }
-        @keyframes scan { 0%, 100% { left: 20%; } 50% { left: 80%; } }
-        @keyframes sweep { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 60px; opacity: 0; } }
+        .ticker-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--danger);
+            color: white;
+            padding: 12px 0;
+            z-index: 1050;
+            overflow: hidden;
+            white-space: nowrap;
+            box-shadow: 0 2px 10px rgba(239, 68, 68, 0.5);
+            border-bottom: 2px solid #b91c1c;
+        }
 
-        .dashboard-section { animation: fadeUp 0.8s ease forwards; opacity: 0; transform: translateY(20px); }
+        .ticker-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: ticker 25s linear infinite;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        @keyframes ticker {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+        .cyber-eye-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .cyber-eye {
+            position: relative;
+            width: 120px;
+            height: 60px;
+            background: #020617;
+            border-radius: 50% / 100% 100% 0 0;
+            border: 3px solid var(--accent);
+            border-bottom: 0;
+            box-shadow: 0 0 30px rgba(14, 165, 233, 0.4), inset 0 0 20px rgba(14, 165, 233, 0.2);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-eye::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            transition: all 0.3s ease;
+        }
+
+        .pupil {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            background: #38bdf8;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px #7dd3fc, inset 0 0 10px #0369a1;
+            animation: scan 4s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+
+        .scanner-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #bae6fd;
+            box-shadow: 0 0 10px #e0f2fe;
+            animation: sweep 2s linear infinite alternate;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes scan {
+            0%, 100% { left: 20%; }
+            50% { left: 80%; }
+        }
+
+        @keyframes sweep {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 60px; opacity: 0; }
+        }
+
+        @keyframes extremeShake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(0px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(2px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(2px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .eye-critical {
+            border-color: var(--danger) !important;
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.8), inset 0 0 30px rgba(239, 68, 68, 0.5) !important;
+            animation: extremeShake 0.3s infinite !important;
+        }
+
+        .eye-critical .pupil {
+            background: var(--danger) !important;
+            box-shadow: 0 0 30px #f87171, inset 0 0 10px #7f1d1d !important;
+            animation: scan 1s ease-in-out infinite !important;
+        }
+
+        .eye-critical .scanner-line {
+            background: #fca5a5 !important;
+            box-shadow: 0 0 15px #fecaca !important;
+            animation: sweep 0.5s linear infinite alternate !important;
+        }
+
+        .eye-critical::after {
+            background: var(--danger) !important;
+            box-shadow: 0 0 15px var(--danger) !important;
+        }
+
+        .dashboard-section {
+            animation: fadeUp 0.8s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
         .delay-1 { animation-delay: 0.2s; }
         .delay-2 { animation-delay: 0.4s; }
-        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-        .content-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.3s ease, border-color 0.3s ease; height: 100%; display: flex; flex-direction: column; }
-        .module-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 30px rgba(14, 165, 233, 0.15); }
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        #map { height: 450px; width: 100%; border-radius: 12px; border: 1px solid var(--border-color); z-index: 1; }
+        .content-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
 
-        .btn-sos { background: var(--danger); color: white; font-weight: bold; font-size: 1.1rem; border-radius: 50px; padding: 12px 20px; border: none; box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); animation: pulseSos 2s infinite; }
-        @keyframes pulseSos { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        .module-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.15);
+        }
 
-        .btn-evac { background: #3b82f6; color: white; font-weight: bold; border-radius: 50px; padding: 12px 20px; border: none; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); transition: all 0.3s ease; }
-        .btn-evac:hover { background: #2563eb; transform: scale(1.05); }
+        #map {
+            height: 450px;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            z-index: 1;
+        }
 
-        .btn-vol { background: transparent; color: var(--success); border: 2px solid var(--success); font-weight: bold; border-radius: 50px; padding: 12px 20px; transition: all 0.3s ease; }
-        .btn-vol:hover { background: var(--success); color: #000; box-shadow: 0 0 15px rgba(34, 197, 94, 0.5); }
+        .btn-sos {
+            background: var(--danger);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 50px;
+            padding: 12px 20px;
+            border: none;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+            animation: pulseSos 2s infinite;
+        }
 
-        .form-control { background: #1e293b; border-color: #334155; color: #f8fafc !important; }
-        .form-control:focus { background: #1e293b; border-color: var(--accent); box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25); }
-        .modal-content { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); }
+        @keyframes pulseSos {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .btn-evac {
+            background: var(--accent);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 50px;
+            padding: 12px 20px;
+            border: none;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-evac:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .btn-vol {
+            background: transparent;
+            color: var(--success);
+            border: 2px solid var(--success);
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 50px;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-vol:hover {
+            background: var(--success);
+            color: #000;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+        }
+
+        .btn-radar {
+            background: transparent;
+            color: var(--warning);
+            border: 2px solid var(--warning);
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 50px;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-radar:hover {
+            background: var(--warning);
+            color: #000;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+        }
+
+        .form-control {
+            background: #1e293b;
+            border-color: #334155;
+            color: #f8fafc !important;
+        }
+
+        .form-control:focus {
+            background: #1e293b;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25);
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
 
         .module-icon { font-size: 2.5rem; margin-bottom: 15px; }
         .module-title { font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
         .module-desc { color: var(--text-sec); font-size: 0.9rem; flex-grow: 1; }
         .module-link { text-decoration: none; display: block; height: 100%; color: inherit; }
 
-        footer { margin-top: auto; padding: 20px 0; border-top: 1px solid #1e293b; color: #64748b; font-size: 0.9rem; letter-spacing: 1px; text-align: center; width: 100%; }
+        .defcon-box {
+            border: 2px solid var(--success);
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            transition: all 0.5s ease;
+        }
+
+        @keyframes criticalPulse {
+            0% { background: rgba(239, 68, 68, 0.1); box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+            50% { background: rgba(239, 68, 68, 0.3); box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+            100% { background: rgba(239, 68, 68, 0.1); box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+        }
+
+        @keyframes glitch {
+          0% { transform: translate(0) }
+          20% { transform: translate(-2px, 2px) }
+          40% { transform: translate(-2px, -2px) }
+          60% { transform: translate(2px, 2px) }
+          80% { transform: translate(2px, -2px) }
+          100% { transform: translate(0) }
+        }
+
+        .glitch-active {
+            animation: glitch 0.3s infinite;
+            color: #ff0000 !important;
+            text-shadow: 2px 0 blue, -2px 0 red;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 20px 0;
+            border-top: 1px solid #1e293b;
+            color: #64748b;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-align: center;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -60,12 +351,12 @@
     <div class="container py-4 flex-grow-1">
         <div class="text-center mb-5 dashboard-section">
             <div class="cyber-eye-container">
-                <div class="cyber-eye">
+                <div id="mainCyberEye" class="cyber-eye">
                     <div class="pupil"></div>
                     <div class="scanner-line"></div>
                 </div>
             </div>
-            <h1 class="fw-bold m-0" style="letter-spacing: 3px; font-size: 2.5rem;">
+            <h1 id="mainTitle" class="fw-bold m-0" style="letter-spacing: 3px; font-size: 2.5rem;">
                 DISASTER<span style="color: var(--accent);">EYE</span>
             </h1>
             <p class="text-sec mt-2 text-uppercase" style="letter-spacing: 2px;">
@@ -73,7 +364,15 @@
             </p>
         </div>
 
-        <div class="row g-4 mb-5 dashboard-section delay-1">
+        <div class="row g-4 mb-4 dashboard-section delay-1">
+            <div class="col-12">
+                <div id="defconStatus" class="defcon-box">
+                    GLOBAL THREAT LEVEL: SECURE
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4  mb-5 dashboard-section delay-1">
             <div class="col-lg-8">
                 <div class="content-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -91,26 +390,16 @@
             <div class="col-lg-4">
                 <div class="content-card d-flex flex-column justify-content-center align-items-center text-center">
                     <h4 class="fw-bold mb-4">Command Center</h4>
-                    <button class="btn-sos w-100 mb-3" data-bs-toggle="modal" data-bs-target="#sosModal"> DECLARE S.O.S</button>
-                    <button class="btn-evac w-100 mb-3" onclick="generateEvacRoute()"> AUTO-EVAC ROUTE</button>
-                    <button class="btn-vol w-100 mb-3" data-bs-toggle="modal" data-bs-target="#volModal"> JOIN RESCUE NET</button>
+                    <button class="btn-sos w-100 mb-3" data-bs-toggle="modal" data-bs-target="#sosModal">DECLARE S.O.S</button>
+                    <button class="btn-evac w-100 mb-3" onclick="generateEvacRoute()">AUTO-EVAC ROUTE</button>
+                    <button class="btn-radar w-100 mb-3" onclick="toggleRadar()">TOGGLE WEATHER RADAR</button>
+                    <button class="btn-vol w-100 mb-3" data-bs-toggle="modal" data-bs-target="#volModal">JOIN RESCUE NET</button>
                     <a href="/chat" class="btn btn-outline-info w-100 py-2 fw-bold">SECURE COMMS</a>
                 </div>
             </div>
         </div>
 
         <div class="row g-4 dashboard-section delay-2">
-            <div class="col-md-4">
-                <a href="/earthquakes" class="module-link">
-                    <div class="content-card module-card">
-                        <div class="module-icon">🌍</div>
-                        <h5 class="module-title">Seismic Activity</h5>
-                        <p class="module-desc">Real-time global tectonic monitoring and magnitude tracking via USGS data streams.</p>
-                        <span class="text-info mt-3 fw-bold">Initialize Module ➔</span>
-                    </div>
-                </a>
-            </div>
-            <div class="row g-4 dashboard-section delay-2">
             <div class="col-md-3">
                 <a href="/triage" class="module-link">
                     <div class="content-card module-card" style="border-left: 4px solid var(--success);">
@@ -121,7 +410,17 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <a href="/earthquakes" class="module-link">
+                    <div class="content-card module-card">
+                        <div class="module-icon">🌍</div>
+                        <h5 class="module-title">Seismic Activity</h5>
+                        <p class="module-desc">Real-time global tectonic monitoring and magnitude tracking via USGS data streams.</p>
+                        <span class="text-info mt-3 fw-bold">Initialize Module ➔</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
                 <a href="/wildfires" class="module-link">
                     <div class="content-card module-card">
                         <div class="module-icon">🔥</div>
@@ -131,7 +430,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <a href="/storms" class="module-link">
                     <div class="content-card module-card">
                         <div class="module-icon">🌪️</div>
@@ -182,7 +481,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title text-danger fw-bold">🚨 EMERGENCY BROADCAST</h5>
+                    <h5 class="modal-title text-danger fw-bold">EMERGENCY BROADCAST</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -212,7 +511,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title text-success fw-bold">🤝 VOLUNTEER REGISTRATION</h5>
+                    <h5 class="modal-title text-success fw-bold">VOLUNTEER REGISTRATION</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -251,6 +550,16 @@
         var volLayer = L.layerGroup().addTo(map);
         var routeLayer = L.layerGroup().addTo(map);
 
+        var weatherRadarLayer = L.tileLayer.wms('https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi', {
+            layers: 'nexrad-n0r-900913',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.65,
+            zIndex: 100
+        });
+
+        var isRadarActive = false;
+
         var redIcon = L.icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -288,11 +597,67 @@
                     if(currentMarker) map.removeLayer(currentMarker);
                     currentMarker = L.marker([lat, lon]).addTo(map).bindPopup("Calibrated Center: " + data[0].display_name).openPopup();
 
-                    localStorage.setItem('savedLat', lat);
-                    localStorage.setItem('savedLng', lon);
+                    localStorage.setItem('userLat', lat);
+                    localStorage.setItem('userLng', lon);
                     localStorage.setItem('userCity', data[0].display_name);
                 }
             });
+        }
+
+        function toggleRadar() {
+            const btn = document.querySelector('.btn-radar');
+            if (isRadarActive) {
+                map.removeLayer(weatherRadarLayer);
+                isRadarActive = false;
+                btn.style.background = "transparent";
+                btn.style.color = "var(--warning)";
+                btn.style.borderColor = "var(--warning)";
+                btn.style.boxShadow = "none";
+            } else {
+                weatherRadarLayer.addTo(map);
+                isRadarActive = true;
+                btn.style.background = "var(--warning)";
+                btn.style.color = "#000";
+                btn.style.borderColor = "var(--warning)";
+                btn.style.boxShadow = "0 0 15px rgba(245, 158, 11, 0.6)";
+
+                var savedLat = localStorage.getItem('userLat');
+                var savedLng = localStorage.getItem('userLng');
+                if(savedLat && savedLng) {
+                    map.flyTo([parseFloat(savedLat), parseFloat(savedLng)], 8);
+                }
+            }
+        }
+
+        function updateDefcon(count) {
+            const defcon = document.getElementById('defconStatus');
+            const mainTitle = document.getElementById('mainTitle');
+            const cyberEye = document.getElementById('mainCyberEye');
+
+            if ( count === 0 ) {
+                defcon.innerText = "GLOBAL THREAT LEVEL: SECURE";
+                defcon.style.borderColor = "var(--success)";
+                defcon.style.color = "var(--success)";
+                defcon.style.background = "rgba(34, 197, 94, 0.1)";
+                defcon.style.animation = "none";
+                mainTitle.classList.remove('glitch-active');
+                cyberEye.classList.remove('eye-critical');
+            } else if (count > 0 && count < 3) {
+                defcon.innerText = "GLOBAL THREAT LEVEL: ELEVATED";
+                defcon.style.borderColor = "#f59e0b";
+                defcon.style.color = "#f59e0b";
+                defcon.style.background = "rgba(245, 158, 11, 0.1)";
+                defcon.style.animation = "none";
+                mainTitle.classList.remove('glitch-active');
+                cyberEye.classList.remove('eye-critical');
+            } else {
+                defcon.innerText = "GLOBAL THREAT LEVEL: CRITICAL";
+                defcon.style.borderColor = "var(--danger)";
+                defcon.style.color = "var(--danger)";
+                defcon.style.animation = "criticalPulse 1s infinite";
+                mainTitle.classList.add('glitch-active');
+                cyberEye.classList.add('eye-critical');
+            }
         }
 
         function loadSOS() {
@@ -302,17 +667,19 @@
                 sosLayer.clearLayers();
 
                 if (!initialLoad && data.length > sosCount) {
-                    alertAudio.play().catch(e => console.log("Sound blocked by browser."));
+                    alertAudio.play().catch(e => console.log("Sound blocked"));
                 }
 
                 sosCount = data.length;
                 initialLoad = false;
 
+                updateDefcon(sosCount);
+
                 data.forEach(ev => {
                     if(ev.lat && ev.lng) {
                         L.marker([ev.lat, ev.lng], {icon: redIcon})
                         .addTo(sosLayer)
-                        .bindPopup(`<strong style="color:red;">🚨 S.O.S: ${ev.type}</strong><br>Time: ${ev.time}<br>Details: ${ev.desc}`);
+                        .bindPopup(`<strong style="color:red;">S.O.S: ${ev.type}</strong><br>Time: ${ev.time}<br>Details: ${ev.desc}`);
                     }
                 });
             });
@@ -327,16 +694,19 @@
                     if(vol.lat && vol.lng) {
                         L.marker([vol.lat, vol.lng], {icon: greenIcon})
                         .addTo(volLayer)
-                        .bindPopup(`<strong style="color:#22c55e;">🤝 Rescue Unit: ${vol.name}</strong><br>Assets: ${vol.skills}`);
+                        .bindPopup(`<strong style="color:#22c55e;">Rescue Unit: ${vol.name}</strong><br>Assets: ${vol.skills}`);
                     }
                 });
             });
         }
 
         function transmitSOS() {
-            var lat = localStorage.getItem('savedLat');
-            var lng = localStorage.getItem('savedLng');
-            if(!lat || !lng) return;
+            var lat = localStorage.getItem('userLat');
+            var lng = localStorage.getItem('userLng');
+            if(!lat || !lng) {
+                alert("ERROR: Calibrate location on the map first!");
+                return;
+            }
 
             var type = document.getElementById('sosType').value;
             var desc = document.getElementById('sosDesc').value;
@@ -354,9 +724,12 @@
         }
 
         function registerVolunteer() {
-            var lat = localStorage.getItem('savedLat');
-            var lng = localStorage.getItem('savedLng');
-            if(!lat || !lng) return;
+            var lat = localStorage.getItem('userLat');
+            var lng = localStorage.getItem('userLng');
+            if(!lat || !lng) {
+                alert("ERROR: Calibrate location first!");
+                return;
+            }
 
             var name = document.getElementById('volName').value;
             var skills = document.getElementById('volSkills').value;
@@ -374,8 +747,8 @@
         }
 
         function generateEvacRoute() {
-            var lat = parseFloat(localStorage.getItem('savedLat'));
-            var lng = parseFloat(localStorage.getItem('savedLng'));
+            var lat = parseFloat(localStorage.getItem('userLat'));
+            var lng =  parseFloat(localStorage.getItem('userLng'));
             if(!lat || !lng) return;
 
             routeLayer.clearLayers();
@@ -390,7 +763,7 @@
 
             L.marker([bunkerLat, bunkerLng], {icon: blueIcon})
             .addTo(routeLayer)
-            .bindPopup(`<strong style="color:#3b82f6;">🛡️ NEAREST SAFE ZONE</strong><br>Distance: ${(dist/1000).toFixed(1)} km<br>ETA: ${etaMins} mins<br>Date: ${dateStr}<br>Time: ${timeStr}`)
+            .bindPopup(`<strong style="color:#3b82f6;">NEAREST SAFE ZONE</strong><br>Distance: ${(dist/1000).toFixed(1)} km<br>ETA: ${etaMins} mins<br>Date: ${dateStr}<br>Time: ${timeStr}`)
             .openPopup();
 
             L.polyline([[lat, lng], [bunkerLat, bunkerLng]], {color: '#3b82f6', weight: 4, dashArray: '10, 10'}).addTo(routeLayer);
@@ -398,8 +771,8 @@
         }
 
         window.onload = function() {
-            var savedLat = localStorage.getItem('savedLat');
-            var savedLng = localStorage.getItem('savedLng');
+            var savedLat = localStorage.getItem('userLat');
+            var savedLng = localStorage.getItem('userLng');
 
             if(savedLat && savedLng) {
                 map.setView([savedLat, savedLng], 12);
