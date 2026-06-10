@@ -2,75 +2,226 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>DisasterEye</title>
+    <title>DisasterEye - Global Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root { --bg-color: #020617; --card-bg: #0f172a; --text-main: #f8fafc; --text-sec: #94a3b8; --accent: #0ea5e9; --danger: #ef4444; --border-color: #1e293b; --success: #22c55e; }
+        body { background: var(--bg-color); color: var(--text-main); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; padding-top: 80px; display: flex; flex-direction: column; }
+
+        .ticker-bar { position: fixed; top: 0; left: 0; width: 100%; background: #ef4444; color: white; padding: 12px 0; z-index: 1050; overflow: hidden; white-space: nowrap; box-shadow: 0 2px 10px rgba(239, 68, 68, 0.5); border-bottom: 2px solid #b91c1c; }
+        .ticker-text { display: inline-block; padding-left: 100%; animation: ticker 25s linear infinite; font-weight: bold; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px; }
+        @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+
+        .cyber-eye-container { display: flex; justify-content: center; margin-bottom: 20px; }
+        .cyber-eye { position: relative; width: 120px; height: 60px; background: #020617; border-radius: 50% / 100% 100% 0 0; border: 3px solid var(--accent); border-bottom: 0; box-shadow: 0 0 30px rgba(14, 165, 233, 0.4), inset 0 0 20px rgba(14, 165, 233, 0.2); overflow: hidden; }
+        .cyber-eye::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--accent); box-shadow: 0 0 15px var(--accent); }
+        .pupil { position: absolute; bottom: 5px; left: 50%; width: 30px; height: 30px; background: #38bdf8; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 0 20px #7dd3fc, inset 0 0 10px #0369a1; animation: scan 4s ease-in-out infinite; }
+        .scanner-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #bae6fd; box-shadow: 0 0 10px #e0f2fe; animation: sweep 2s linear infinite alternate; }
+        @keyframes scan { 0%, 100% { left: 20%; } 50% { left: 80%; } }
+        @keyframes sweep { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 60px; opacity: 0; } }
+
+        .dashboard-section { animation: fadeUp 0.8s ease forwards; opacity: 0; transform: translateY(20px); }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        .content-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.3s ease, border-color 0.3s ease; height: 100%; display: flex; flex-direction: column; }
+        .module-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 30px rgba(14, 165, 233, 0.15); }
+
+        #map { height: 450px; width: 100%; border-radius: 12px; border: 1px solid var(--border-color); z-index: 1; }
+
+        .btn-sos { background: var(--danger); color: white; font-weight: bold; font-size: 1.1rem; border-radius: 50px; padding: 12px 20px; border: none; box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); animation: pulseSos 2s infinite; }
+        @keyframes pulseSos { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
+        .btn-evac { background: #3b82f6; color: white; font-weight: bold; border-radius: 50px; padding: 12px 20px; border: none; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); transition: all 0.3s ease; }
+        .btn-evac:hover { background: #2563eb; transform: scale(1.05); }
+
+        .btn-vol { background: transparent; color: var(--success); border: 2px solid var(--success); font-weight: bold; border-radius: 50px; padding: 12px 20px; transition: all 0.3s ease; }
+        .btn-vol:hover { background: var(--success); color: #000; box-shadow: 0 0 15px rgba(34, 197, 94, 0.5); }
+
+        .form-control { background: #1e293b; border-color: #334155; color: #f8fafc !important; }
+        .form-control:focus { background: #1e293b; border-color: var(--accent); box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25); }
+        .modal-content { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); }
+
+        .module-icon { font-size: 2.5rem; margin-bottom: 15px; }
+        .module-title { font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
+        .module-desc { color: var(--text-sec); font-size: 0.9rem; flex-grow: 1; }
+        .module-link { text-decoration: none; display: block; height: 100%; color: inherit; }
+
+        footer { margin-top: auto; padding: 20px 0; border-top: 1px solid #1e293b; color: #64748b; font-size: 0.9rem; letter-spacing: 1px; text-align: center; width: 100%; }
+    </style>
 </head>
-<body class="bg-dark text-white container mt-5">
-    <div class="alert alert-danger text-center">
-        <strong>{{ ticker }}</strong>
+<body>
+    <div class="ticker-bar">
+        <div class="ticker-text">{{ ticker }}</div>
     </div>
 
-    <h1 class="text-center mb-4">DisasterEye Dashboard</h1>
-
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h4>Location Map</h4>
-            <div class="input-group mb-2">
-                <input type="text" id="locationInput" placeholder="Enter City" class="form-control bg-secondary text-white">
-                <button onclick="searchLocation()" class="btn btn-primary">Set Location</button>
+    <div class="container py-4 flex-grow-1">
+        <div class="text-center mb-5 dashboard-section">
+            <div class="cyber-eye-container">
+                <div class="cyber-eye">
+                    <div class="pupil"></div>
+                    <div class="scanner-line"></div>
+                </div>
             </div>
-            <div id="map" style="height: 400px; width: 100%; border: 1px solid #555;"></div>
+            <h1 class="fw-bold m-0" style="letter-spacing: 3px; font-size: 2.5rem;">
+                DISASTER<span style="color: var(--accent);">EYE</span>
+            </h1>
+            <p class="text-sec mt-2 text-uppercase" style="letter-spacing: 2px;">
+                Advanced Threat Telemetry
+            </p>
         </div>
-        <div class="col-md-4">
-            <h4>Actions</h4>
-            <button class="btn btn-danger w-100 mb-2 py-3" data-bs-toggle="modal" data-bs-target="#sosModal">Send S.O.S</button>
-            <button class="btn btn-success w-100 mb-2 py-3" data-bs-toggle="modal" data-bs-target="#volModal">Register as Volunteer</button>
-            <button onclick="generateEvac()" class="btn btn-info w-100 mb-2 py-3">Generate Evacuation Route</button>
-        </div>
-    </div>
 
-    <div class="row text-center">
-        <div class="col-md-4 mb-3"><a href="/earthquakes" class="btn btn-outline-primary w-100 py-3">Earthquakes</a></div>
-        <div class="col-md-4 mb-3"><a href="/wildfires" class="btn btn-outline-danger w-100 py-3">Wildfires</a></div>
-        <div class="col-md-4 mb-3"><a href="/storms" class="btn btn-outline-secondary w-100 py-3">Storms</a></div>
-        <div class="col-md-4 mb-3"><a href="/floods" class="btn btn-outline-info w-100 py-3">Floods</a></div>
-        <div class="col-md-4 mb-3"><a href="/extreme-heat" class="btn btn-outline-warning w-100 py-3">Extreme Heat</a></div>
-        <div class="col-md-4 mb-3"><a href="/kit" class="btn btn-outline-success w-100 py-3">Survival Kit</a></div>
-        <div class="col-md-12"><a href="/chat" class="btn btn-outline-light w-100 py-3">Chat</a></div>
-    </div>
-
-    <div class="modal fade" id="sosModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header">
-                    <h5 class="modal-title">S.O.S Alert</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="row g-4 mb-5 dashboard-section delay-1">
+            <div class="col-lg-8">
+                <div class="content-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0">
+                            <span style="color: var(--accent);">●</span> Global Radar Feed
+                        </h5>
+                        <div class="input-group" style="max-width: 300px;">
+                            <input type="text" id="locationInput" class="form-control form-control-sm" placeholder="City or Postal Code">
+                            <button class="btn btn-outline-info btn-sm" type="button" onclick="searchLocation()">Calibrate</button>
+                        </div>
+                    </div>
+                    <div id="map"></div>
                 </div>
-                <div class="modal-body">
-                    <input type="text" id="sosType" class="form-control mb-2 bg-secondary text-white" placeholder="Emergency Type">
-                    <input type="text" id="sosDesc" class="form-control bg-secondary text-white" placeholder="Description">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" onclick="sendSOS()">Submit S.O.S</button>
+            </div>
+            <div class="col-lg-4">
+                <div class="content-card d-flex flex-column justify-content-center align-items-center text-center">
+                    <h4 class="fw-bold mb-4">Command Center</h4>
+                    <button class="btn-sos w-100 mb-3" data-bs-toggle="modal" data-bs-target="#sosModal"> DECLARE S.O.S</button>
+                    <button class="btn-evac w-100 mb-3" onclick="generateEvacRoute()"> AUTO-EVAC ROUTE</button>
+                    <button class="btn-vol w-100 mb-3" data-bs-toggle="modal" data-bs-target="#volModal"> JOIN RESCUE NET</button>
+                    <a href="/chat" class="btn btn-outline-info w-100 py-2 fw-bold">SECURE COMMS</a>
                 </div>
             </div>
         </div>
+
+        <div class="row g-4 dashboard-section delay-2">
+            <div class="col-md-4">
+                <a href="/earthquakes" class="module-link">
+                    <div class="content-card module-card">
+                        <div class="module-icon">🌍</div>
+                        <h5 class="module-title">Seismic Activity</h5>
+                        <p class="module-desc">Real-time global tectonic monitoring and magnitude tracking via USGS data streams.</p>
+                        <span class="text-info mt-3 fw-bold">Initialize Module ➔</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/wildfires" class="module-link">
+                    <div class="content-card module-card">
+                        <div class="module-icon">🔥</div>
+                        <h5 class="module-title">Wildfire Tracking</h5>
+                        <p class="module-desc">Report active combustion events. AI models simulate geographic spread based on telemetry.</p>
+                        <span class="text-danger mt-3 fw-bold">Initialize Module ➔</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/storms" class="module-link">
+                    <div class="content-card module-card">
+                        <div class="module-icon">🌪️</div>
+                        <h5 class="module-title">Atmospheric Scanner</h5>
+                        <p class="module-desc">Connect live optical sensors (webcams) for AI-driven cumulonimbus and tornado detection.</p>
+                        <span class="text-warning mt-3 fw-bold">Initialize Module ➔</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/floods" class="module-link">
+                    <div class="content-card module-card">
+                        <div class="module-icon">🌊</div>
+                        <h5 class="module-title">Hydro-Sensors</h5>
+                        <p class="module-desc">Monitor local water levels and identify active flood alerts in calibrated sectors.</p>
+                        <span class="text-primary mt-3 fw-bold">Initialize Module ➔</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/extreme-heat" class="module-link">
+                    <div class="content-card module-card">
+                        <div class="module-icon">☀️</div>
+                        <h5 class="module-title">Thermal Threat</h5>
+                        <p class="module-desc">Assess lethal Wet-Bulb Globe Temperatures combining heat and atmospheric humidity.</p>
+                        <span class="text-warning mt-3 fw-bold" style="color: #fb923c !important;">Initialize Module ➔</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/kit" class="module-link">
+                    <div class="content-card module-card">
+                        <div class="module-icon">🎒</div>
+                        <h5 class="module-title">Survival Logistics</h5>
+                        <p class="module-desc">Calculate required inventory for 72-hour family sustenance during severe grid failures.</p>
+                        <span class="text-success mt-3 fw-bold">Initialize Module ➔</span>
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
 
-    <div class="modal fade" id="volModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header">
-                    <h5 class="modal-title">Volunteer Registration</h5>
+    <footer>
+        &copy; 2026 Genius Olympiad 8036 Project BinaryMonkeys
+    </footer>
+
+    <div class="modal fade" id="sosModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-danger fw-bold">🚨 EMERGENCY BROADCAST</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" id="volName" class="form-control mb-2 bg-secondary text-white" placeholder="Your Name">
-                    <input type="text" id="volSkills" class="form-control bg-secondary text-white" placeholder="Your Skills/Assets">
+                    <div class="mb-3">
+                        <label class="form-label text-sec">Threat Classification</label>
+                        <select id="sosType" class="form-select form-control">
+                            <option value="Fire Incident">Fire Incident</option>
+                            <option value="Severe Flooding">Severe Flooding</option>
+                            <option value="Structural Collapse">Structural Collapse</option>
+                            <option value="Medical Emergency">Mass Medical Emergency</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-sec">Status/Details</label>
+                        <textarea id="sosDesc" class="form-control" rows="3"></textarea>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" onclick="registerVolunteer()">Register</button>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abort</button>
+                    <button type="button" class="btn btn-danger fw-bold" onclick="transmitSOS()">TRANSMIT S.O.S</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="volModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-success fw-bold">🤝 VOLUNTEER REGISTRATION</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-sec">Callsign / Name</label>
+                        <input type="text" id="volName" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-sec">Available Assets / Skills</label>
+                        <select id="volSkills" class="form-select form-control">
+                            <option value="4x4 Vehicle">4x4 Off-Road Vehicle</option>
+                            <option value="Medical Training">Medical Training / First Aid</option>
+                            <option value="Heavy Machinery">Heavy Machinery</option>
+                            <option value="General Logistics">General Logistics & Supply</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abort</button>
+                    <button type="button" class="btn btn-success fw-bold" onclick="registerVolunteer()">JOIN NETWORK</button>
                 </div>
             </div>
         </div>
@@ -80,44 +231,114 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         var map = L.map('map').setView([20, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        var marker;
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap, © CartoDB'
+        }).addTo(map);
+
+        var currentMarker = null;
         var sosLayer = L.layerGroup().addTo(map);
         var volLayer = L.layerGroup().addTo(map);
         var routeLayer = L.layerGroup().addTo(map);
 
+        var redIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+
+        var greenIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+
+        var blueIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+
+        const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        let sosCount = 0;
+        let initialLoad = true;
+
         function searchLocation() {
             var query = document.getElementById('locationInput').value;
             if(!query) return;
+
             fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query))
             .then(res => res.json())
             .then(data => {
                 if(data.length > 0) {
-                    var lat = data[0].lat;
-                    var lon = data[0].lon;
-                    map.setView([lat, lon], 12);
-                    if(marker) map.removeLayer(marker);
-                    marker = L.marker([lat, lon]).addTo(map).bindPopup(data[0].display_name).openPopup();
+                    var lat = parseFloat(data[0].lat);
+                    var lon = parseFloat(data[0].lon);
+                    map.flyTo([lat, lon], 12);
+
+                    if(currentMarker) map.removeLayer(currentMarker);
+                    currentMarker = L.marker([lat, lon]).addTo(map).bindPopup("Calibrated Center: " + data[0].display_name).openPopup();
+
                     localStorage.setItem('savedLat', lat);
                     localStorage.setItem('savedLng', lon);
+                    localStorage.setItem('userCity', data[0].display_name);
                 }
             });
         }
 
-        function sendSOS() {
+        function loadSOS() {
+            fetch('/api/sos')
+            .then(res => res.json())
+            .then(data => {
+                sosLayer.clearLayers();
+
+                if (!initialLoad && data.length > sosCount) {
+                    alertAudio.play().catch(e => console.log("Sound blocked by browser."));
+                }
+
+                sosCount = data.length;
+                initialLoad = false;
+
+                data.forEach(ev => {
+                    if(ev.lat && ev.lng) {
+                        L.marker([ev.lat, ev.lng], {icon: redIcon})
+                        .addTo(sosLayer)
+                        .bindPopup(`<strong style="color:red;">🚨 S.O.S: ${ev.type}</strong><br>Time: ${ev.time}<br>Details: ${ev.desc}`);
+                    }
+                });
+            });
+        }
+
+        function loadVolunteers() {
+            fetch('/api/volunteers')
+            .then(res => res.json())
+            .then(data => {
+                volLayer.clearLayers();
+                data.forEach(vol => {
+                    if(vol.lat && vol.lng) {
+                        L.marker([vol.lat, vol.lng], {icon: greenIcon})
+                        .addTo(volLayer)
+                        .bindPopup(`<strong style="color:#22c55e;">🤝 Rescue Unit: ${vol.name}</strong><br>Assets: ${vol.skills}`);
+                    }
+                });
+            });
+        }
+
+        function transmitSOS() {
             var lat = localStorage.getItem('savedLat');
             var lng = localStorage.getItem('savedLng');
             if(!lat || !lng) return;
+
             var type = document.getElementById('sosType').value;
             var desc = document.getElementById('sosDesc').value;
+
             fetch('/api/sos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lat: lat, lng: lng, type: type, desc: desc })
+                body: JSON.stringify({ type: type, desc: desc, lat: lat, lng: lng })
             }).then(() => {
                 var modal = bootstrap.Modal.getInstance(document.getElementById('sosModal'));
                 modal.hide();
-                loadMapData();
+                loadSOS();
+                map.flyTo([lat, lng], 13);
             });
         }
 
@@ -125,55 +346,59 @@
             var lat = localStorage.getItem('savedLat');
             var lng = localStorage.getItem('savedLng');
             if(!lat || !lng) return;
+
             var name = document.getElementById('volName').value;
             var skills = document.getElementById('volSkills').value;
+
             fetch('/api/volunteers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lat: lat, lng: lng, name: name, skills: skills })
+                body: JSON.stringify({ name: name, skills: skills, lat: lat, lng: lng })
             }).then(() => {
                 var modal = bootstrap.Modal.getInstance(document.getElementById('volModal'));
                 modal.hide();
-                loadMapData();
+                loadVolunteers();
+                map.flyTo([lat, lng], 13);
             });
         }
 
-        function generateEvac() {
+        function generateEvacRoute() {
             var lat = parseFloat(localStorage.getItem('savedLat'));
             var lng = parseFloat(localStorage.getItem('savedLng'));
             if(!lat || !lng) return;
+
             routeLayer.clearLayers();
-            var targetLat = lat + 0.05;
-            var targetLng = lng + 0.05;
-            L.polyline([[lat, lng], [targetLat, targetLng]], {color: 'blue'}).addTo(routeLayer);
-            L.marker([targetLat, targetLng]).addTo(routeLayer).bindPopup("Safe Zone").openPopup();
-        }
+            var bunkerLat = lat + (Math.random() * 0.04 - 0.02);
+            var bunkerLng = lng + (Math.random() * 0.04 - 0.02);
+            var dist = map.distance([lat, lng], [bunkerLat, bunkerLng]);
+            var etaMins = Math.max(1, Math.round((dist / 1000) / 40 * 60));
 
-        function loadMapData() {
-            fetch('/api/sos').then(res => res.json()).then(data => {
-                sosLayer.clearLayers();
-                data.forEach(ev => {
-                    L.circleMarker([ev.lat, ev.lng], {color: 'red'}).addTo(sosLayer).bindPopup(ev.type + ": " + ev.desc);
-                });
-            });
-            fetch('/api/volunteers').then(res => res.json()).then(data => {
-                volLayer.clearLayers();
-                data.forEach(vol => {
-                    L.circleMarker([vol.lat, vol.lng], {color: 'green'}).addTo(volLayer).bindPopup(vol.name + " - " + vol.skills);
-                });
-            });
-        }
+            var now = new Date();
+            var timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            var dateStr = now.toLocaleDateString();
 
-        setInterval(loadMapData, 5000);
+            L.marker([bunkerLat, bunkerLng], {icon: blueIcon})
+            .addTo(routeLayer)
+            .bindPopup(`<strong style="color:#3b82f6;">🛡️ NEAREST SAFE ZONE</strong><br>Distance: ${(dist/1000).toFixed(1)} km<br>ETA: ${etaMins} mins<br>Date: ${dateStr}<br>Time: ${timeStr}`)
+            .openPopup();
+
+            L.polyline([[lat, lng], [bunkerLat, bunkerLng]], {color: '#3b82f6', weight: 4, dashArray: '10, 10'}).addTo(routeLayer);
+            map.fitBounds([[lat, lng], [bunkerLat, bunkerLng]], {padding: [50, 50]});
+        }
 
         window.onload = function() {
             var savedLat = localStorage.getItem('savedLat');
             var savedLng = localStorage.getItem('savedLng');
+
             if(savedLat && savedLng) {
                 map.setView([savedLat, savedLng], 12);
-                marker = L.marker([savedLat, savedLng]).addTo(map);
+                currentMarker = L.marker([savedLat, savedLng]).addTo(map).bindPopup("Calibrated Center").openPopup();
             }
-            loadMapData();
+
+            loadSOS();
+            loadVolunteers();
+            setInterval(loadSOS, 10000);
+            setInterval(loadVolunteers, 10000);
         };
     </script>
 </body>

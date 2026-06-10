@@ -4,52 +4,154 @@
     <title>Wildfires</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            background: #020617;
+            color: #f8fafc;
+            font-family: sans-serif;
+            padding: 20px;
+            padding-top: 80px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .ticker-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #ef4444;
+            color: white;
+            padding: 12px 0;
+            z-index: 1050;
+            overflow: hidden;
+            white-space: nowrap;
+            box-shadow: 0 2px 10px rgba(239, 68, 68, 0.5);
+            border-bottom: 2px solid #b91c1c;
+        }
+        .ticker-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: ticker 25s linear infinite;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        @keyframes ticker {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+        .data-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            animation: fadeUp 0.6s ease;
+        }
+        #predictionMap {
+            height: 400px;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+        .btn-back {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: #1e293b;
+            color: white;
+            border: 1px solid #ef4444;
+            border-radius: 30px;
+            padding: 12px 25px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .btn-back:hover {
+            background: #ef4444;
+            color: white;
+            transform: scale(1.05);
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        footer {
+            margin-top: auto;
+            padding: 20px 0;
+            border-top: 1px solid #1e293b;
+            color: #64748b;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+    </style>
 </head>
-<body class="bg-dark text-white container mt-5">
-    <div class="alert alert-danger text-center"><strong>{{ ticker }}</strong></div>
-    <a href="/" class="btn btn-outline-light mb-4">Back to Dashboard</a>
-    <h2>Wildfires Tracker</h2>
+<body class="container">
+    <div class="ticker-bar">
+        <div class="ticker-text">{{ ticker }}</div>
+    </div>
 
-    <div id="firemap" style="height: 300px; width: 100%; border: 1px solid #555; margin-bottom: 20px;"></div>
+    <a href="/" class="btn-back">⬅ Dashboard</a>
+    <h2 class="fw-bold mb-2 mt-4" style="color: #ef4444;">🔥 Wildfire Tracking Engine</h2>
+    <p class="text-secondary mb-5">Initiate AI spread modeling based on topography and wind vectors.</p>
 
-    <form method="POST">
-        <input type="hidden" name="lat" id="lat">
-        <input type="hidden" name="lng" id="lng">
-        <button type="submit" class="btn btn-danger">Report Fire</button>
-    </form>
+    <div class="data-card text-center">
+        <h5 class="mb-3 text-light" id="locDisplay">Waiting for global coordinates...</h5>
+        <form method="POST" id="fireForm">
+            <input type="hidden" name="lat" id="lat">
+            <input type="hidden" name="lng" id="lng">
+            <button type="button" class="btn btn-danger px-5 py-3 fw-bold" onclick="submitReport()">GENERATE SPREAD PREDICTION</button>
+        </form>
+    </div>
 
     {% if lat and lng %}
-    <div class="mt-4 alert alert-danger">
-        <h4>Fire Reported at {{ lat }}, {{ lng }}</h4>
+    <div class="data-card" style="border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05);">
+        <h4 class="text-danger fw-bold mb-3">Threat Vector Processed</h4>
+        <p class="text-light">Origin: {{ lat }}, {{ lng }} <br> Forecast: Expanding Northeast. See projection below.</p>
+        <div id="predictionMap" class="mt-4"></div>
     </div>
     {% endif %}
 
+    <footer>&copy; 2026 Genius Olympiad 8036 Project BinaryMonkeys</footer>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        var savedLat = localStorage.getItem('savedLat') || 20;
-        var savedLng = localStorage.getItem('savedLng') || 0;
+        var savedLat = localStorage.getItem('savedLat');
+        var savedLng = localStorage.getItem('savedLng');
 
-        var map = L.map('firemap').setView([savedLat, savedLng], savedLat == 20 ? 2 : 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        window.onload = function() {
+            if(savedLat && savedLng) {
+                document.getElementById('locDisplay').innerHTML = `Target Locked: <strong style="color:#38bdf8;">${localStorage.getItem('userCity')}</strong>`;
+                document.getElementById('lat').value = savedLat;
+                document.getElementById('lng').value = savedLng;
+            } else {
+                document.getElementById('locDisplay').innerText = "ERROR: Calibrate location on the Home page first.";
+            }
+        };
 
-        var fireMarker;
-        map.on('click', function(e) {
-            document.getElementById('lat').value = e.latlng.lat;
-            document.getElementById('lng').value = e.latlng.lng;
-            if(fireMarker) map.removeLayer(fireMarker);
-            fireMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
-        });
+        function submitReport() {
+            if(!savedLat || !savedLng) {
+                alert("Calibration required. Return to dashboard.");
+                return;
+            }
+            document.getElementById('fireForm').submit();
+        }
 
         {% if lat and lng %}
-        var reportedLat = {{ lat }};
-        var reportedLng = {{ lng }};
-        L.marker([reportedLat, reportedLng]).addTo(map).bindPopup("Fire").openPopup();
+        var predMap = L.map('predictionMap').setView([{{ lat }}, {{ lng }}], 13);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(predMap);
+        L.marker([{{ lat }}, {{ lng }}]).addTo(predMap).bindPopup("Ignition Point").openPopup();
+
         L.polygon([
-            [reportedLat, reportedLng],
-            [reportedLat + 0.05, reportedLng + 0.05],
-            [reportedLat + 0.05, reportedLng - 0.05]
-        ], {color: 'red'}).addTo(map);
-        map.setView([reportedLat, reportedLng], 12);
+            [{{ lat }}, {{ lng }}],
+            [{{ lat }} + 0.02, {{ lng }} + 0.015],
+            [{{ lat }} + 0.02, {{ lng }} + 0.03]
+        ], { color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.3 }).addTo(predMap);
         {% endif %}
     </script>
 </body>

@@ -1,38 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Storms</title>
+    <title>Storm Scanner</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #020617;
+            color: #f8fafc;
+            font-family: sans-serif;
+            padding: 20px;
+            padding-top: 80px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .ticker-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #ef4444;
+            color: white;
+            padding: 12px 0;
+            z-index: 1050;
+            overflow: hidden;
+            white-space: nowrap;
+            box-shadow: 0 2px 10px rgba(239, 68, 68, 0.5);
+            border-bottom: 2px solid #b91c1c;
+        }
+        .ticker-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: ticker 25s linear infinite;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        @keyframes ticker {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+        .data-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            animation: fadeUp 0.6s ease;
+        }
+        #webcam {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            background: #000;
+            border: 2px solid #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+        .btn-back {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: #1e293b;
+            color: white;
+            border: 1px solid #f59e0b;
+            border-radius: 30px;
+            padding: 12px 25px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .btn-back:hover {
+            background: #f59e0b;
+            color: white;
+            transform: scale(1.05);
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        footer {
+            margin-top: auto;
+            padding: 20px 0;
+            border-top: 1px solid #1e293b;
+            color: #64748b;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+    </style>
 </head>
-<body class="bg-dark text-white container mt-5">
-    <div class="alert alert-danger text-center"><strong>{{ ticker }}</strong></div>
-    <a href="/" class="btn btn-outline-light mb-4">Back to Dashboard</a>
-    <h2>Storm Camera</h2>
-
-    <video id="webcam" autoplay playsinline style="width: 100%; max-width: 500px; border: 1px solid #555;"></video>
-    <br>
-    <button onclick="scanSky()" class="btn btn-secondary mt-3">Scan Sky</button>
-
-    <div id="result" class="mt-4 d-none">
-        <h4 id="status"></h4>
-        <p>Density: <span id="density"></span>%</p>
+<body class="container">
+    <div class="ticker-bar">
+        <div class="ticker-text">{{ ticker }}</div>
     </div>
+
+    <a href="/" class="btn-back">⬅ Dashboard</a>
+    <h2 class="fw-bold mb-2 mt-4 text-warning">🌪️ Optical Cloud Analysis</h2>
+    <p class="text-secondary mb-5">Point camera skyward for real-time AI density evaluation.</p>
+
+    <div class="data-card">
+        <video id="webcam" autoplay playsinline></video><br>
+        <button id="scanBtn" class="btn btn-warning px-5 py-3 fw-bold">INITIATE SENSOR SWEEP</button>
+
+        <div id="resultBox" class="mt-4 p-4 rounded d-none" style="background: rgba(0,0,0,0.5); border: 1px solid #334155;">
+            <h4 id="statusTitle" class="fw-bold m-0 text-uppercase"></h4>
+            <p id="statusMsg" class="mt-2 mb-2 text-light"></p>
+            <div class="progress mt-3" style="height: 25px; background: #1e293b;">
+                <div id="densityBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
+            </div>
+            <small class="mt-2 d-block text-secondary">Cloud Density: <span id="densityScore" class="text-white fw-bold"></span>%</small>
+        </div>
+    </div>
+
+    <footer>&copy; 2026 Genius Olympiad 8036 Project BinaryMonkeys</footer>
 
     <script>
         const video = document.getElementById('webcam');
-        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-            video.srcObject = stream;
-        });
 
-        function scanSky() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => { alert("Optical sensor offline (Camera denied)."); });
+
+        document.getElementById('scanBtn').addEventListener('click', () => {
+            const btn = document.getElementById('scanBtn');
+            btn.innerText = "EVALUATING METRICS...";
+            btn.disabled = true;
+
             fetch('/analyze-sky', { method: 'POST' })
             .then(res => res.json())
             .then(data => {
-                document.getElementById('result').classList.remove('d-none');
-                document.getElementById('status').innerText = data.status;
-                document.getElementById('density').innerText = data.density;
+                btn.innerText = "INITIATE SENSOR SWEEP";
+                btn.disabled = false;
+
+                const box = document.getElementById('resultBox');
+                box.classList.remove('d-none');
+
+                const bar = document.getElementById('densityBar');
+                bar.style.width = data.density + "%";
+
+                if(data.status === "DANGER") {
+                    document.getElementById('statusTitle').style.color = "#ef4444";
+                    bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-danger";
+                } else {
+                    document.getElementById('statusTitle').style.color = "#22c55e";
+                    bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-success";
+                }
+
+                document.getElementById('statusTitle').innerText = data.status;
+                document.getElementById('statusMsg').innerText = data.message;
+                document.getElementById('densityScore').innerText = data.density;
             });
-        }
+        });
     </script>
 </body>
 </html>

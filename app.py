@@ -11,10 +11,10 @@ volunteers = []
 
 def get_latest_alert():
     alerts = [
-        "LATEST EVENT: Magnitude 6.2 Earthquake detected.",
-        "LATEST EVENT: High Wildfire Risk reported.",
-        "LATEST EVENT: Severe atmospheric anomalies detected.",
-        "LATEST EVENT: WBGT index reaching critical levels."
+        "🚨 LATEST EVENT: Magnitude 6.2 Earthquake detected in the Pacific Ring of Fire.",
+        "🔥 LATEST EVENT: High Wildfire Risk reported in western arid sectors. Wind vectors expanding.",
+        "🌪️ LATEST EVENT: Severe atmospheric anomalies detected. Tornado warning in effect.",
+        "☀️ LATEST EVENT: WBGT index reaching critical levels in equatorial sectors. Hydration advised."
     ]
     return random.choice(alerts)
 
@@ -58,7 +58,7 @@ def floods():
 def extreme_heat():
     temp = random.randint(35, 45)
     hum = random.randint(50, 90)
-    danger = "CRITICAL" if (temp > 38 and hum > 60) else "MODERATE"
+    danger = "CRITICAL - Lethal Wet-Bulb Temp" if (temp > 38 and hum > 60) else "MODERATE - Stay Hydrated"
     return render_template('extreme_heat.html', temp=temp, hum=hum, danger=danger, ticker=get_latest_alert())
 
 @app.route('/kit')
@@ -89,10 +89,11 @@ def api_sos():
     if request.method == 'POST':
         data = request.json
         new_event = {
-            "type": data.get("type", "Emergency"),
+            "type": data.get("type", "Unknown Event"),
             "desc": data.get("desc", ""),
             "lat": data.get("lat"),
-            "lng": data.get("lng")
+            "lng": data.get("lng"),
+            "time": datetime.now().strftime("%H:%M")
         }
         sos_events.append(new_event)
         return jsonify({"status": "success"})

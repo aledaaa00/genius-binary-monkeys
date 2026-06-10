@@ -1,17 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Floods</title>
+    <title>Hydro-Sensors</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #020617;
+            color: #f8fafc;
+            font-family: sans-serif;
+            padding: 20px;
+            padding-top: 80px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .ticker-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #ef4444;
+            color: white;
+            padding: 12px 0;
+            z-index: 1050;
+            overflow: hidden;
+            white-space: nowrap;
+            box-shadow: 0 2px 10px rgba(239, 68, 68, 0.5);
+            border-bottom: 2px solid #b91c1c;
+        }
+        .ticker-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: ticker 25s linear infinite;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        @keyframes ticker {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+        .data-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            animation: pulseFade 2s infinite alternate;
+        }
+        .btn-back {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: #1e293b;
+            color: white;
+            border: 1px solid #3b82f6;
+            border-radius: 30px;
+            padding: 12px 25px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .btn-back:hover {
+            background: #3b82f6;
+            color: white;
+            transform: scale(1.05);
+        }
+        @keyframes pulseFade {
+            from { box-shadow: 0 0 10px rgba(14, 165, 233, 0.1); }
+            to { box-shadow: 0 0 30px rgba(14, 165, 233, 0.3); }
+        }
+        footer {
+            margin-top: auto;
+            padding: 20px 0;
+            border-top: 1px solid #1e293b;
+            color: #64748b;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+    </style>
 </head>
-<body class="bg-dark text-white container mt-5">
-    <div class="alert alert-danger text-center"><strong>{{ ticker }}</strong></div>
-    <a href="/" class="btn btn-outline-light mb-4">Back to Dashboard</a>
-    <h2>Flood Monitoring</h2>
-
-    <div class="alert alert-info mt-4 text-dark">
-        <h4>Status</h4>
-        <p>Connecting to water level sensors... Water levels are currently normal.</p>
+<body class="container">
+    <div class="ticker-bar">
+        <div class="ticker-text">{{ ticker }}</div>
     </div>
+
+    <a href="/" class="btn-back">⬅ Dashboard</a>
+    <h2 class="fw-bold mb-2 mt-4 text-primary">🌊 Hydrological Grid</h2>
+    <p class="text-secondary mb-5">Interfacing with municipal water level telemetry.</p>
+
+    <div class="data-card mt-5">
+        <div class="spinner-grow text-primary mb-4" style="width: 3rem; height: 3rem;" role="status"></div>
+        <h4 class="text-primary fw-bold">Grid Synced</h4>
+        <p class="text-light mt-3">Sectors secure. Water levels functioning within optimal parameters.</p>
+    </div>
+
+    <footer>&copy; 2026 Genius Olympiad 8036 Project BinaryMonkeys</footer>
 </body>
 </html>
