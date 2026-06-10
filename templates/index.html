@@ -21,9 +21,11 @@
 
         body {
             background-color: var(--bg-color);
-            background-image: linear-gradient(rgba(2, 6, 23, 0.4), rgba(2, 6, 23, 0.8)), url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
+            background-image:
+                linear-gradient(rgba(14, 165, 233, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(14, 165, 233, 0.15) 1px, transparent 1px),
+                radial-gradient(circle at 50% 50%, rgba(2,6,23,0.4), rgba(2,6,23,1));
+            background-size: 50px 50px, 50px 50px, 100% 100%;
             background-attachment: fixed;
             color: var(--text-main);
             font-family: 'Segoe UI', system-ui, sans-serif;
@@ -541,6 +543,17 @@
                         <div class="module-icon"><i class="bi bi-backpack"></i></div>
                         <h5 class="module-title">Survival Logistics</h5>
                         <p class="module-desc">Calculate required inventory for 72-hour family sustenance during severe grid failures.</p>
+                        <span class="mt-auto fw-bold small">INITIALIZE ➔</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="module-wrapper" style="color: #ec4899;">
+                    <a href="/kids" class="module-inner">
+                        <div class="module-icon"><i class="bi bi-rocket"></i></div>
+                        <h5 class="module-title">Cyber Scout Academy</h5>
+                        <p class="module-desc">Child-friendly interactive training protocols for disaster survival and safety.</p>
                         <span class="mt-auto fw-bold small">INITIALIZE ➔</span>
                     </a>
                 </div>

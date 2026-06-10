@@ -85,6 +85,11 @@ def triage():
     return render_template('triage.html', ticker=get_latest_alert())
 
 
+@app.route('/kids')
+def kids():
+    return render_template('kids.html', ticker=get_latest_alert())
+
+
 @app.route('/api/triage', methods=['POST'])
 def api_triage():
     data = request.json

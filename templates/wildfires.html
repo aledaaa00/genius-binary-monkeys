@@ -120,8 +120,8 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        var savedLat = localStorage.getItem('savedLat');
-        var savedLng = localStorage.getItem('savedLng');
+        var savedLat = localStorage.getItem('userLat');
+        var savedLng = localStorage.getItem('userLng');
 
         window.onload = function() {
             if(savedLat && savedLng) {

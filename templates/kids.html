@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Cyber Scout Academy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #020617;
+            background-image: linear-gradient(rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.95)), url('https://images.unsplash.com/photo-1593440428988-7517173e35a9?auto=format&fit=crop&w=2000&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #f8fafc;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+            padding-top: 100px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+            background-size: 100% 4px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .ticker-bar { position: fixed; top: 0; left: 0; width: 100%; background: #ef4444; color: white; padding: 12px 0; z-index: 1050; overflow: hidden; white-space: nowrap; border-bottom: 2px solid #b91c1c; }
+        .ticker-text { display: inline-block; padding-left: 100%; animation: ticker 25s linear infinite; font-weight: bold; font-family: monospace; font-size: 1.1rem; }
+        @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+
+        .btn-back { position: fixed; bottom: 30px; left: 30px; background: #1e293b; color: white; border: 1px solid #ec4899; border-radius: 30px; padding: 12px 25px; z-index: 1000; font-weight: bold; text-decoration: none; transition: all 0.3s ease; }
+        .btn-back:hover { background: #ec4899; color: #000; transform: scale(1.05); }
+
+        .flip-card {
+            background-color: transparent;
+            width: 100%;
+            height: 280px;
+            perspective: 1000px;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .flip-card-front {
+            background: rgba(15, 23, 42, 0.9);
+            border: 3px solid #334155;
+        }
+
+        .flip-card-back {
+            background: rgba(30, 41, 59, 0.95);
+            transform: rotateY(180deg);
+            border: 3px solid transparent;
+        }
+
+        .emoji-huge { font-size: 5rem; margin-bottom: 15px; }
+        .card-title-kids { font-weight: 900; font-size: 1.5rem; letter-spacing: 1px; }
+        .card-text-kids { font-size: 1.2rem; font-weight: bold; line-height: 1.4; }
+
+        .border-earthquake { border-color: #0ea5e9 !important; }
+        .border-fire { border-color: #ef4444 !important; }
+        .border-flood { border-color: #3b82f6 !important; }
+        .border-storm { border-color: #f59e0b !important; }
+
+        footer { margin-top: auto; padding: 20px 0; border-top: 1px solid #1e293b; color: #64748b; font-size: 0.9rem; text-align: center; position: relative; z-index: 1001; }
+    </style>
+</head>
+<body class="container">
+    <div class="ticker-bar"><div class="ticker-text">{{ ticker }}</div></div>
+
+    <a href="/" class="btn-back">⬅ Dashboard</a>
+
+    <div style="position: relative; z-index: 1001;" class="text-center mb-5 mt-3">
+        <h1 class="fw-bold" style="color: #ec4899; font-size: 3rem; text-transform: uppercase; letter-spacing: 2px;">
+            <i class="bi bi-rocket"></i> Cyber Scout Academy
+        </h1>
+        <p class="text-secondary fs-5">Hover over the cards to learn how to stay safe!</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+
+        <div class="col-lg-3 col-md-6">
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front border-earthquake">
+                        <div class="emoji-huge">🌍</div>
+                        <h3 class="card-title-kids text-info">EARTHQUAKE</h3>
+                        <span class="text-secondary">When the ground shakes...</span>
+                    </div>
+                    <div class="flip-card-back border-earthquake">
+                        <div class="emoji-huge">🐢</div>
+                        <h4 class="card-text-kids text-info">DROP, COVER, AND HOLD ON!</h4>
+                        <p class="text-light mt-2">Hide under a strong table and protect your head like a turtle!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front border-fire">
+                        <div class="emoji-huge">🔥</div>
+                        <h3 class="card-title-kids text-danger">WILDFIRE / FIRE</h3>
+                        <span class="text-secondary">If you see smoke or fire...</span>
+                    </div>
+                    <div class="flip-card-back border-fire">
+                        <div class="emoji-huge">🛑</div>
+                        <h4 class="card-text-kids text-danger">GET LOW & GO!</h4>
+                        <p class="text-light mt-2">Crawl on the floor where the air is clean. If your clothes catch fire: STOP, DROP, and ROLL!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front border-flood">
+                        <div class="emoji-huge">🌊</div>
+                        <h3 class="card-title-kids" style="color: #3b82f6;">FLOODS</h3>
+                        <span class="text-secondary">When the water rises...</span>
+                    </div>
+                    <div class="flip-card-back border-flood">
+                        <div class="emoji-huge">🧗</div>
+                        <h4 class="card-text-kids" style="color: #3b82f6;">CLIMB HIGH!</h4>
+                        <p class="text-light mt-2">Never play in flood water! It's dirty and moves fast. Go to the highest floor of the house.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front border-storm">
+                        <div class="emoji-huge">🌪️</div>
+                        <h3 class="card-title-kids text-warning">STORM / TORNADO</h3>
+                        <span class="text-secondary">When the wind is super strong...</span>
+                    </div>
+                    <div class="flip-card-back border-storm">
+                        <div class="emoji-huge">🏠</div>
+                        <h4 class="card-text-kids text-warning">STAY AWAY FROM WINDOWS!</h4>
+                        <p class="text-light mt-2">Go to the basement or an inside room with no windows. Stay with your family!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>&copy; 2026 Genius Olympiad 8036 Project BinaryMonkeys</footer>
+</body>
+</html>
