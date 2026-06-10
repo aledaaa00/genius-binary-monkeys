@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>DisasterEye - Global Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -19,7 +20,11 @@
         }
 
         body {
-            background: var(--bg-color);
+            background-color: var(--bg-color);
+            background-image: linear-gradient(rgba(2, 6, 23, 0.4), rgba(2, 6, 23, 0.8)), url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             color: var(--text-main);
             font-family: 'Segoe UI', system-ui, sans-serif;
             min-height: 100vh;
@@ -27,6 +32,19 @@
             padding-top: 80px;
             display: flex;
             flex-direction: column;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+            background-size: 100% 4px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0.5;
         }
 
         .ticker-bar {
@@ -63,6 +81,7 @@
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
+            position: relative; z-index: 1001;
         }
 
         .cyber-eye {
@@ -169,6 +188,7 @@
             animation: fadeUp 0.8s ease forwards;
             opacity: 0;
             transform: translateY(20px);
+            position: relative; z-index: 1001;
         }
 
         .delay-1 { animation-delay: 0.2s; }
@@ -179,22 +199,16 @@
         }
 
         .content-card {
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(10px);
             border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
             transition: transform 0.3s ease, border-color 0.3s ease;
             height: 100%;
             display: flex;
             flex-direction: column;
-        }
-
-        .module-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
-            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.15);
         }
 
         #map {
@@ -292,11 +306,6 @@
             border: 1px solid var(--border-color);
         }
 
-        .module-icon { font-size: 2.5rem; margin-bottom: 15px; }
-        .module-title { font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
-        .module-desc { color: var(--text-sec); font-size: 0.9rem; flex-grow: 1; }
-        .module-link { text-decoration: none; display: block; height: 100%; color: inherit; }
-
         .defcon-box {
             border: 2px solid var(--success);
             background: rgba(34, 197, 94, 0.1);
@@ -340,6 +349,65 @@
             letter-spacing: 1px;
             text-align: center;
             width: 100%;
+            position: relative; z-index: 1001;
+        }
+
+        .module-wrapper {
+            position: relative;
+            padding: 2px;
+            background: var(--border-color);
+            clip-path: polygon(25px 0, 100% 0, 100% calc(100% - 25px), calc(100% - 25px) 100%, 0 100%, 0 25px);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+        }
+
+        .module-wrapper:hover {
+            background: currentColor;
+            transform: translateY(-8px);
+            filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.7));
+        }
+
+        .module-inner {
+            background: rgba(15, 23, 42, 0.92);
+            clip-path: polygon(24px 0, 100% 0, 100% calc(100% - 24px), calc(100% - 24px) 100%, 0 100%, 0 24px);
+            width: 100%;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.3s ease;
+        }
+
+        .module-wrapper:hover .module-inner {
+            background: rgba(30, 41, 59, 0.98);
+        }
+
+        .module-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .module-wrapper:hover .module-icon {
+            transform: scale(1.15);
+        }
+
+        .module-title {
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .module-desc {
+            color: var(--text-sec);
+            font-size: 0.9rem;
+            flex-grow: 1;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -399,77 +467,85 @@
             </div>
         </div>
 
-        <div class="row g-4 dashboard-section delay-2">
-            <div class="col-md-3">
-                <a href="/triage" class="module-link">
-                    <div class="content-card module-card" style="border-left: 4px solid var(--success);">
-                        <div class="module-icon">⚕️</div>
+        <div class="row g-4 dashboard-section delay-2 justify-content-center">
+
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="module-wrapper" style="color: var(--success);">
+                    <a href="/triage" class="module-inner">
+                        <div class="module-icon"><i class="bi bi-heart-pulse"></i></div>
                         <h5 class="module-title">Bio-Triage AI</h5>
                         <p class="module-desc">Instant first aid processing and critical medical instructions for localized casualties.</p>
-                        <span class="text-success mt-3 fw-bold">Initialize Module ➔</span>
-                    </div>
-                </a>
+                        <span class="mt-auto fw-bold small">INITIALIZE ➔</span>
+                    </a>
+                </div>
             </div>
-            <div class="col-md-3">
-                <a href="/earthquakes" class="module-link">
-                    <div class="content-card module-card">
-                        <div class="module-icon">🌍</div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="module-wrapper" style="color: var(--accent);">
+                    <a href="/earthquakes" class="module-inner">
+                        <div class="module-icon"><i class="bi bi-globe-americas"></i></div>
                         <h5 class="module-title">Seismic Activity</h5>
                         <p class="module-desc">Real-time global tectonic monitoring and magnitude tracking via USGS data streams.</p>
-                        <span class="text-info mt-3 fw-bold">Initialize Module ➔</span>
-                    </div>
-                </a>
+                        <span class="mt-auto fw-bold small">INITIALIZE ➔</span>
+                    </a>
+                </div>
             </div>
-            <div class="col-md-3">
-                <a href="/wildfires" class="module-link">
-                    <div class="content-card module-card">
-                        <div class="module-icon">🔥</div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="module-wrapper" style="color: var(--danger);">
+                    <a href="/wildfires" class="module-inner">
+                        <div class="module-icon"><i class="bi bi-fire"></i></div>
                         <h5 class="module-title">Wildfire Tracking</h5>
                         <p class="module-desc">Report active combustion events. AI models simulate geographic spread based on telemetry.</p>
-                        <span class="text-danger mt-3 fw-bold">Initialize Module ➔</span>
-                    </div>
-                </a>
+                        <span class="mt-auto fw-bold small">INITIALIZE ➔</span>
+                    </a>
+                </div>
             </div>
-            <div class="col-md-3">
-                <a href="/storms" class="module-link">
-                    <div class="content-card module-card">
-                        <div class="module-icon">🌪️</div>
-                        <h5 class="module-title">Atmospheric Scanner</h5>
-                        <p class="module-desc">Connect live optical sensors (webcams) for AI-driven cumulonimbus and tornado detection.</p>
-                        <span class="text-warning mt-3 fw-bold">Initialize Module ➔</span>
-                    </div>
-                </a>
+
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="module-wrapper" style="color: var(--warning);">
+                    <a href="/storms" class="module-inner">
+                        <div class="module-icon"><i class="bi bi-hurricane"></i></div>
+                        <h5 class="module-title">Storm Scanner</h5>
+                        <p class="module-desc">Connect live optical sensors for AI-driven cumulonimbus and tornado detection.</p>
+                        <span class="mt-auto fw-bold small">INITIALIZE ➔</span>
+                    </a>
+                </div>
             </div>
-            <div class="col-md-4">
-                <a href="/floods" class="module-link">
-                    <div class="content-card module-card">
-                        <div class="module-icon">🌊</div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="module-wrapper" style="color: #3b82f6;">
+                    <a href="/floods" class="module-inner">
+                        <div class="module-icon"><i class="bi bi-water"></i></div>
                         <h5 class="module-title">Hydro-Sensors</h5>
                         <p class="module-desc">Monitor local water levels and identify active flood alerts in calibrated sectors.</p>
-                        <span class="text-primary mt-3 fw-bold">Initialize Module ➔</span>
-                    </div>
-                </a>
+                        <span class="mt-auto fw-bold small">INITIALIZE ➔</span>
+                    </a>
+                </div>
             </div>
-            <div class="col-md-4">
-                <a href="/extreme-heat" class="module-link">
-                    <div class="content-card module-card">
-                        <div class="module-icon">☀️</div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="module-wrapper" style="color: #fb923c;">
+                    <a href="/extreme-heat" class="module-inner">
+                        <div class="module-icon"><i class="bi bi-thermometer-high"></i></div>
                         <h5 class="module-title">Thermal Threat</h5>
                         <p class="module-desc">Assess lethal Wet-Bulb Globe Temperatures combining heat and atmospheric humidity.</p>
-                        <span class="text-warning mt-3 fw-bold" style="color: #fb923c !important;">Initialize Module ➔</span>
-                    </div>
-                </a>
+                        <span class="mt-auto fw-bold small">INITIALIZE ➔</span>
+                    </a>
+                </div>
             </div>
-            <div class="col-md-4">
-                <a href="/kit" class="module-link">
-                    <div class="content-card module-card">
-                        <div class="module-icon">🎒</div>
+
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="module-wrapper" style="color: #a855f7;">
+                    <a href="/kit" class="module-inner">
+                        <div class="module-icon"><i class="bi bi-backpack"></i></div>
                         <h5 class="module-title">Survival Logistics</h5>
                         <p class="module-desc">Calculate required inventory for 72-hour family sustenance during severe grid failures.</p>
-                        <span class="text-success mt-3 fw-bold">Initialize Module ➔</span>
-                    </div>
-                </a>
+                        <span class="mt-auto fw-bold small">INITIALIZE ➔</span>
+                    </a>
+                </div>
             </div>
+
         </div>
     </div>
 
@@ -540,13 +616,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        var map = L.map('map').setView([20, 0], 2);
+        var  map = L.map('map').setView([20, 0], 2);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap, © CartoDB'
         }).addTo(map);
 
         var currentMarker = null;
-        var sosLayer = L.layerGroup().addTo(map);
+        var sosLayer =  L.layerGroup().addTo(map);
         var volLayer = L.layerGroup().addTo(map);
         var routeLayer = L.layerGroup().addTo(map);
 
@@ -772,7 +848,7 @@
 
         window.onload = function() {
             var savedLat = localStorage.getItem('userLat');
-            var savedLng = localStorage.getItem('userLng');
+            var  savedLng = localStorage.getItem('userLng');
 
             if(savedLat && savedLng) {
                 map.setView([savedLat, savedLng], 12);
